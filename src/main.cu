@@ -333,11 +333,11 @@ FLAMEGPU_AGENT_FUNCTION(inputdata, MsgSpatial3D, MsgNone) {
 int main(int argc, const char ** argv) {
     
     unsigned int initialPopSize = 1024;
-    unsigned int finalPopSize = 2048;
+    unsigned int finalPopSize = 4096;
     unsigned int popSizeIncrement = 1024;
     
     unsigned int initialNumSpecies = 1;
-    unsigned int finalNumSpecies = 4;
+    unsigned int finalNumSpecies = 8;
     unsigned int numSpeciesIncrement = 1;
 
     std::vector<double> results;
@@ -382,7 +382,7 @@ int main(int argc, const char ** argv) {
             }
 
             {   // Location message
-                for (int i = 0; i < populationSizes.size(); i++) {
+                for (unsigned int i = 0; i < populationSizes.size(); i++) {
                     std::string messageName = "location";
                     messageName += std::to_string(i);
                     MsgSpatial3D::Description &message = model.newMessage<MsgSpatial3D>(messageName);
@@ -401,7 +401,7 @@ int main(int argc, const char ** argv) {
                     message.newVariable<float>("fz");
                 }
             }
-            for (int i = 0; i < populationSizes.size(); i++) {
+            for (unsigned int i = 0; i < populationSizes.size(); i++) {
                 {   // Boid agent
                     std::string agentName = "Boid";
                     agentName += std::to_string(i);
@@ -424,7 +424,7 @@ int main(int argc, const char ** argv) {
             * Control flow
             */     
             {   // Layer #1
-                for (int i = 0; i < populationSizes.size(); i++) {
+                for (unsigned int i = 0; i < populationSizes.size(); i++) {
                     std::string agentName = "Boid";
                     agentName += std::to_string(i);
                     LayerDescription &layer = model.newLayer();
@@ -432,7 +432,7 @@ int main(int argc, const char ** argv) {
                 }
             }
             {   // Layer #2
-                for (int i = 0; i < populationSizes.size(); i++) {
+                for (unsigned int i = 0; i < populationSizes.size(); i++) {
                     std::string agentName = "Boid";
                     agentName += std::to_string(i);
                     LayerDescription &layer = model.newLayer();
@@ -456,7 +456,7 @@ int main(int argc, const char ** argv) {
                 const float INIT_CAM = env.getProperty<float>("MAX_POSITION") * 1.25f;
                 visualisation.setInitialCameraLocation(INIT_CAM, INIT_CAM, INIT_CAM);
                 visualisation.setCameraSpeed(0.002f * envWidth);
-                for (int i = 0; i < populationSizes.size(); i++) {
+                for (unsigned int i = 0; i < populationSizes.size(); i++) {
                     std::string agentName = "Boid";
                     agentName += std::to_string(i);
                     auto &circ_agt = visualisation.addAgent(agentName);
@@ -484,7 +484,7 @@ int main(int argc, const char ** argv) {
                 std::uniform_real_distribution<float> velocity_magnitude_distribution(env.getProperty<float>("MIN_INITIAL_SPEED"), env.getProperty<float>("MAX_INITIAL_SPEED"));
                 
                 unsigned int agentCounter = 0;
-                for (int i = 0; i < populationSizes.size(); i++) {
+                for (unsigned int i = 0; i < populationSizes.size(); i++) {
                     std::string agentName = "Boid";
                     agentName += std::to_string(i);
                     AgentPopulation population(model.Agent(agentName), populationSizes[i]);
@@ -541,6 +541,13 @@ int main(int argc, const char ** argv) {
             visualisation.close();
 #endif
         }
+    }
+
+    // Output parameters to file
+    std::ofstream paramsFile("params.csv");
+    if (paramsFile.is_open()) {
+        paramsFile << initialPopSize << "," << finalPopSize << "," << popSizeIncrement << std::endl;
+        paramsFile << initialNumSpecies << "," << finalNumSpecies << "," << numSpeciesIncrement << std::endl;
     }
 
     // Output results to file
