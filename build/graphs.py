@@ -26,16 +26,52 @@ with open('params.csv') as f:
   finalNumSpecies = speciesRow[1]
   numSpeciesIncrement = speciesRow[2]     
 
-with open('results.csv') as f:
-  csvreader = csv.reader(f) 
-  fig, ax = plt.subplots()
-  for row in csvreader:
-    row = list(map(float, row))
-    ax.plot(np.arange(initialNumSpecies, finalNumSpecies + 1, numSpeciesIncrement),row,"^--", linewidth=1)
-  ax.grid(True)
-  ax.set_title('Average step time against number of species')
-  ax.set_ylabel('Average Step time (ms)')
-  ax.set_xlabel('Number of species')
-  ax.xaxis.set_ticks(np.arange(initialNumSpecies, finalNumSpecies + 1, numSpeciesIncrement))
-  ax.legend(np.arange(initialPopSize, finalPopSize + 1, popSizeIncrement), title="Population Size")
-  plt.show()
+with open('serial.csv') as serial:
+  with open('concurrent.csv') as concurrent:
+    fig, ax = plt.subplots()
+    
+    # Read in data
+    serialRows = []
+    concurrentRows = []
+    
+    csvreader = csv.reader(serial)
+    for row in csvreader:
+      row = list(map(float, row))
+      serialRows.append(row)
+      
+    csvreader = csv.reader(concurrent)
+    for row in csvreader:
+      row = list(map(float, row))
+      concurrentRows.append(row)
+      
+    # Plot serial results
+    for row in serialRows:
+      ax.plot(np.arange(initialNumSpecies, finalNumSpecies + 1, numSpeciesIncrement),row,"^--", linewidth=1)
+      
+    # Plot concurrent results
+    for row in concurrentRows:
+      ax.plot(np.arange(initialNumSpecies, finalNumSpecies + 1, numSpeciesIncrement),row,"^-", linewidth=1)
+    
+    # Display timing results  
+    ax.grid(True)
+    ax.set_title('Average step time against number of species')
+    ax.set_ylabel('Average Step time (ms)')
+    ax.set_xlabel('Number of species')
+    ax.xaxis.set_ticks(np.arange(initialNumSpecies, finalNumSpecies + 1, numSpeciesIncrement))
+    ax.legend(np.arange(initialPopSize, finalPopSize + 1, popSizeIncrement), title="Population Size")
+      
+    # Plot speedup
+    fig2, ax2 = plt.subplots()
+    for s, c in zip(serialRows, concurrentRows):
+      r = []
+      for i in range(len(s)):
+        r.append(s[i] / c[i])
+      ax2.plot(np.arange(initialNumSpecies, finalNumSpecies + 1, numSpeciesIncrement), r, "^-", linewidth=1)
+
+    ax2.set_title('Speedup against number of species')
+    ax2.set_ylabel('Speedup')
+    ax2.set_xlabel('Number of species')
+    ax2.xaxis.set_ticks(np.arange(initialNumSpecies, finalNumSpecies + 1, numSpeciesIncrement))
+    ax2.legend(np.arange(initialPopSize, finalPopSize + 1, popSizeIncrement), title="Population Size")
+    plt.show()
+    
