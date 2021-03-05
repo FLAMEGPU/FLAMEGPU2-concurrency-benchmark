@@ -363,13 +363,13 @@ typedef struct Experiment {
 
 int main(int argc, const char ** argv) {
 
-    Experiment smallFixedPop("Small Fixed Pop", 512, 512, 512, 1, 8, 1, 5, 1024);
-    Experiment smallPops("Small Pops", 128, 1024, 128, 1, 2, 1, 1, 1024);
-    Experiment largePops("Large Pops", 1024, 8192, 1024, 1, 2, 1, 1, 1024);
+    Experiment smallFixedPop("Small Fixed Pop", 512, 512, 512, 1, 16, 1, 5, 1024);
+    Experiment smallPops("Small Pops", 128, 1024, 128, 1, 8, 1, 5, 1024);
+    Experiment largePops("Large Pops", 1024, 8192, 1024, 1, 8, 1, 5, 1024);
     Experiment deviceMaxed("Device Maxed", 100000, 100000, 100000, 1, 8, 1, 1, 4096);
     //Experiment sweepPopDensity("Sweep Population Density", 4096, 4096, 4096, 1, 8, 1);
     
-    std::vector<Experiment> experiments = {smallFixedPop};
+    std::vector<Experiment> experiments = {deviceMaxed};
     
     for (Experiment experiment : experiments) {
         
@@ -411,15 +411,12 @@ int main(int argc, const char ** argv) {
                         for (unsigned int pops = 0; pops < numSpecies; pops++) {
                             populationSizes.push_back(popSize);
                         }
-                        {
-                            // Population size to generate, if no agents are loaded from disk
-                            env.newProperty("POPULATION_TO_GENERATE", 32768u);
-                            
+                        {                          
                             // Target pop density
                             double targetVolume = (double)popSize / targetPopDensity;
                             double sideLength = std::cbrt(targetVolume);
                             double halfSideLength = sideLength / 2.0;
-                            std::cout << "Using side length: " << sideLength << std::endl;
+                            //std::cout << "Using side length: " << sideLength << std::endl;
 
 
                             // Environment Bounds
@@ -544,8 +541,7 @@ int main(int argc, const char ** argv) {
                         // If no xml model file was is provided, generate a population.
                         if (cuda_model.getSimulationConfig().input_file.empty()) {
                             // Set number of steps
-                            auto config = cuda_model.getSimulationConfig();
-                            config.steps = 1000;
+                            cuda_model.SimulationConfig().steps = 1000;
 
                             // Uniformly distribute agents within space, with uniformly distributed initial velocity.
                             std::mt19937 rngEngine(cuda_model.getSimulationConfig().random_seed);
@@ -591,17 +587,13 @@ int main(int argc, const char ** argv) {
                         * Execution
                         */
                         cuda_model.CUDAConfig().inLayerConcurrency = isConcurrent;
-                        std::cout << "In layer concurrency set to: " << cuda_model.CUDAConfig().inLayerConcurrency << std::endl;
+                        //std::cout << "In layer concurrency set to: " << cuda_model.CUDAConfig().inLayerConcurrency << std::endl;
 
-                        const auto startTime = std::chrono::system_clock::now();
-                        while (cuda_model.getStepCounter() < 1000 && cuda_model.step()) {
-                        
-                        }
-                        const auto endTime = std::chrono::system_clock::now();
-                        const auto runTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+                        cuda_model.simulate();
+                        const auto runTime = cuda_model.getElapsedTimeSimulation();
                         const double averageStepTime = runTime / 1000.0;
                         
-                        std::cout << "Run complete. Average step time: " << averageStepTime << "ms" << std::endl;
+                        //std::cout << "Run complete. Average step time: " << averageStepTime << "ms" << std::endl;
                         if (isConcurrent) {
                             concurrentResults[resultsIndex] += averageStepTime;
                         } else {

@@ -58,7 +58,11 @@ with open('serial.csv') as serial:
     ax.set_ylabel('Average Step time (ms)')
     ax.set_xlabel('Number of species')
     ax.xaxis.set_ticks(np.arange(initialNumSpecies, finalNumSpecies + 1, numSpeciesIncrement))
-    ax.legend(np.arange(initialPopSize, finalPopSize + 1, popSizeIncrement), title="Population Size")
+    legendNums = np.arange(initialPopSize, finalPopSize + 1, popSizeIncrement)
+    legend = list(map(str, legendNums))
+    legend2 = list(map(lambda a : str(a) + " (concurrent)", legendNums))
+    legend = np.concatenate((legend, legend2))
+    ax.legend(legend, title="Population Size")
       
     # Plot speedup
     fig2, ax2 = plt.subplots()
