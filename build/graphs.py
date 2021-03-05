@@ -71,6 +71,7 @@ with open('serial.csv') as serial:
     ax2.set_title('Speedup against number of species')
     ax2.set_ylabel('Speedup')
     ax2.set_xlabel('Number of species')
+    ax2.set_ylim([1.0, None])
     ax2.xaxis.set_ticks(np.arange(initialNumSpecies, finalNumSpecies + 1, numSpeciesIncrement))
     ax2.legend(np.arange(initialPopSize, finalPopSize + 1, popSizeIncrement), title="Population Size")
     plt.show()

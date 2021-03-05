@@ -331,265 +331,333 @@ FLAMEGPU_AGENT_FUNCTION(inputdata, MsgSpatial3D, MsgNone) {
 }
 )###";
 
-int main(int argc, const char ** argv) {
-    
-    unsigned int initialPopSize = 128;
-    unsigned int finalPopSize = 1024;
-    unsigned int popSizeIncrement = 128;
+typedef struct Experiment { 
+
+    Experiment(std::string title, 
+        unsigned int initialPopSize, unsigned int finalPopSize, unsigned int popSizeIncrement, 
+        unsigned int initialNumSpecies, unsigned int finalNumSpecies, unsigned int numSpeciesIncrement,
+        unsigned int repetitions,
+        double targetPopDensity) {
+            this->title = title;
+            this->initialPopSize = initialPopSize;
+            this->finalPopSize = finalPopSize;
+            this->popSizeIncrement = popSizeIncrement;
+            this->initialNumSpecies = initialNumSpecies;
+            this->finalNumSpecies = finalNumSpecies;
+            this->numSpeciesIncrement = numSpeciesIncrement;
+            this->repetitions = repetitions;
+            this->targetPopDensity = targetPopDensity;
+        }
+    std::string title;
+    unsigned int initialPopSize = 100000;
+    unsigned int finalPopSize = 100000;
+    unsigned int popSizeIncrement = 100000;
     
     unsigned int initialNumSpecies = 1;
     unsigned int finalNumSpecies = 8;
     unsigned int numSpeciesIncrement = 1;
 
-    std::vector<double> serialResults;
-    std::vector<double> concurrentResults;
+    unsigned int repetitions = 1;
+    double targetPopDensity = 1024;
+} Experiment;
+
+int main(int argc, const char ** argv) {
+
+    Experiment smallFixedPop("Small Fixed Pop", 512, 512, 512, 1, 8, 1, 5, 1024);
+    Experiment smallPops("Small Pops", 128, 1024, 128, 1, 2, 1, 1, 1024);
+    Experiment largePops("Large Pops", 1024, 8192, 1024, 1, 2, 1, 1, 1024);
+    Experiment deviceMaxed("Device Maxed", 100000, 100000, 100000, 1, 8, 1, 1, 4096);
+    //Experiment sweepPopDensity("Sweep Population Density", 4096, 4096, 4096, 1, 8, 1);
     
-    for (unsigned int isConcurrent = 0; isConcurrent <= 1; isConcurrent++) {
+    std::vector<Experiment> experiments = {smallFixedPop};
+    
+    for (Experiment experiment : experiments) {
+        
+        std::cout << std::endl << "Starting experiment: " << experiment.title << std::endl;
+
+        unsigned int initialPopSize = experiment.initialPopSize;
+        unsigned int finalPopSize = experiment.finalPopSize;
+        unsigned int popSizeIncrement = experiment.popSizeIncrement;
+        
+        unsigned int initialNumSpecies = experiment.initialNumSpecies;
+        unsigned int finalNumSpecies = experiment.finalNumSpecies;
+        unsigned int numSpeciesIncrement = experiment.numSpeciesIncrement;
+
+        // Target population density per cubic unit
+        double targetPopDensity = experiment.targetPopDensity;
+
+        std::vector<double> serialResults;
+        std::vector<double> concurrentResults;
         for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
             for (unsigned int numSpecies = initialNumSpecies; numSpecies <= finalNumSpecies; numSpecies+= numSpeciesIncrement) {
-                std::cout << "Staring run with popSize: " << popSize << ", species: " << numSpecies << std::endl;
-                ModelDescription model("Boids_Concurrency");
+                serialResults.push_back(0.0);
+                concurrentResults.push_back(0.0);
+            }
+        }
+        
+        for (unsigned int isConcurrent = 0; isConcurrent <= 1; isConcurrent++) {
+            for (unsigned int repetition = 0; repetition < experiment.repetitions; repetition++) {
+                unsigned int resultsIndex = 0;
+                for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
+                    for (unsigned int numSpecies = initialNumSpecies; numSpecies <= finalNumSpecies; numSpecies+= numSpeciesIncrement) {
+                        std::cout << "Staring run with popSize: " << popSize << ", species: " << numSpecies << std::endl;
+                        ModelDescription model("Boids_Concurrency");
 
-                /**
-                * GLOBALS
-                */
-                EnvironmentDescription &env = model.Environment();
-                std::vector<unsigned int> populationSizes;
-                for (unsigned int pops = 0; pops < numSpecies; pops++) {
-                    populationSizes.push_back(popSize);
-                }
-                {
-                    // Population size to generate, if no agents are loaded from disk
-                    env.newProperty("POPULATION_TO_GENERATE", 32768u);
-
-                    // Environment Bounds
-                    env.newProperty("MIN_POSITION", -0.5f);
-                    env.newProperty("MAX_POSITION", +0.5f);
-
-                    // Initialisation parameter(s)
-                    env.newProperty("MAX_INITIAL_SPEED", 1.0f);
-                    env.newProperty("MIN_INITIAL_SPEED", 0.01f);
-
-                    // Interaction radius
-                    env.newProperty("INTERACTION_RADIUS", 0.2f);
-                    env.newProperty("SEPARATION_RADIUS", 0.005f);
-
-                    // Global Scalers
-                    env.newProperty("TIME_SCALE", 0.0005f);
-                    env.newProperty("GLOBAL_SCALE", 0.15f);
-
-                    // Rule scalers
-                    env.newProperty("STEER_SCALE", 0.65f);
-                    env.newProperty("COLLISION_SCALE", 0.75f);
-                    env.newProperty("MATCH_SCALE", 1.25f);
-                }
-
-                {   // Location message
-                    for (unsigned int i = 0; i < populationSizes.size(); i++) {
-                        std::string messageName = "location";
-                        messageName += std::to_string(i);
-                        MsgSpatial3D::Description &message = model.newMessage<MsgSpatial3D>(messageName);
-                        // Set the range and bounds.
-                        message.setRadius(env.getProperty<float>("INTERACTION_RADIUS"));
-                        message.setMin(env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MIN_POSITION"));
-                        message.setMax(env.getProperty<float>("MAX_POSITION"), env.getProperty<float>("MAX_POSITION"), env.getProperty<float>("MAX_POSITION"));
-                        // A message to hold the location of an agent.
-                        message.newVariable<int>("id");
-                        // X Y Z are implicit.
-                        // message.newVariable<float>("x");
-                        // message.newVariable<float>("y");
-                        // message.newVariable<float>("z");
-                        message.newVariable<float>("fx");
-                        message.newVariable<float>("fy");
-                        message.newVariable<float>("fz");
-                    }
-                }
-                for (unsigned int i = 0; i < populationSizes.size(); i++) {
-                    {   // Boid agent
-                        std::string agentName("Boid" + std::to_string(i));
-                        AgentDescription &agent = model.newAgent(agentName);
-                        agent.newVariable<int>("id");
-                        agent.newVariable<float>("x");
-                        agent.newVariable<float>("y");
-                        agent.newVariable<float>("z");
-                        agent.newVariable<float>("fx");
-                        agent.newVariable<float>("fy");
-                        agent.newVariable<float>("fz");
-                        std::string messageName = "location";
-                        messageName += std::to_string(i);
-                        std::string outputFuncName = "outputdata";
-                        outputFuncName += std::to_string(i);
-                        std::string inputFuncName = "inputdata";
-                        inputFuncName += std::to_string(i);
-                        agent.newRTCFunction(agentName + outputFuncName, outputdata).setMessageOutput(messageName);
-                        agent.newRTCFunction(agentName + inputFuncName, inputdata).setMessageInput(messageName);
-                    }
-                }
-
-                /**
-                * Control flow
-                */     
-                {   // Layer #1
-                    LayerDescription &layer = model.newLayer();
-                    for (unsigned int i = 0; i < populationSizes.size(); i++) {
-                        std::string agentName = "Boid";
-                        agentName += std::to_string(i);
-                        std::string outputFuncName = "outputdata";
-                        outputFuncName += std::to_string(i);
-                        layer.addAgentFunction(agentName, agentName + outputFuncName);
-                    }
-                }
-                {   // Layer #2
-                    LayerDescription &layer = model.newLayer();
-                    for (unsigned int i = 0; i < populationSizes.size(); i++) {
-                        std::string agentName = "Boid";
-                        agentName += std::to_string(i);
-                        std::string inputFuncName = "inputdata";
-                        inputFuncName += std::to_string(i);
-                        layer.addAgentFunction(agentName, agentName + inputFuncName);
-                    }
-                }
-
-
-                /**
-                * Create Model Runner
-                */
-                CUDASimulation cuda_model(model);
-
-                /**
-                * Create visualisation
-                */
-        #ifdef VISUALISATION
-                ModelVis &visualisation = cuda_model.getVisualisation();
-                {
-                    float envWidth = env.getProperty<float>("MAX_POSITION") - env.getProperty<float>("MIN_POSITION");
-                    const float INIT_CAM = env.getProperty<float>("MAX_POSITION") * 1.25f;
-                    visualisation.setInitialCameraLocation(INIT_CAM, INIT_CAM, INIT_CAM);
-                    visualisation.setCameraSpeed(0.002f * envWidth);
-                    for (unsigned int i = 0; i < populationSizes.size(); i++) {
-                        std::string agentName = "Boid";
-                        agentName += std::to_string(i);
-                        auto &circ_agt = visualisation.addAgent(agentName);
-                        // Position vars are named x, y, z; so they are used by default
-                        circ_agt.setModel(Stock::Models::ICOSPHERE);
-                        circ_agt.setModelScale((i+1)*env.getProperty<float>("SEPARATION_RADIUS"));
-                    }
-                }
-                visualisation.activate();
-        #endif
-
-                // Initialisation
-                cuda_model.initialise(argc, argv);
-
-                // If no xml model file was is provided, generate a population.
-                if (cuda_model.getSimulationConfig().input_file.empty()) {
-                    // Set number of steps
-                    auto config = cuda_model.getSimulationConfig();
-                    config.steps = 1000;
-
-                    // Uniformly distribute agents within space, with uniformly distributed initial velocity.
-                    std::mt19937 rngEngine(cuda_model.getSimulationConfig().random_seed);
-                    std::uniform_real_distribution<float> position_distribution(env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MAX_POSITION"));
-                    std::uniform_real_distribution<float> velocity_distribution(-1, 1);
-                    std::uniform_real_distribution<float> velocity_magnitude_distribution(env.getProperty<float>("MIN_INITIAL_SPEED"), env.getProperty<float>("MAX_INITIAL_SPEED"));
-                    
-                    unsigned int agentCounter = 0;
-                    for (unsigned int i = 0; i < populationSizes.size(); i++) {
-                        std::string agentName = "Boid";
-                        agentName += std::to_string(i);
-                        AgentPopulation population(model.Agent(agentName), populationSizes[i]);
-                        for (unsigned int j = 0; j < populationSizes[i]; j++) {
-                            AgentInstance instance = population.getNextInstance();
-                            instance.setVariable<int>("id", agentCounter);
-                            agentCounter++;
-
-                            // Agent position in space
-                            instance.setVariable<float>("x", position_distribution(rngEngine));
-                            instance.setVariable<float>("y", position_distribution(rngEngine));
-                            instance.setVariable<float>("z", position_distribution(rngEngine));
-
-                            // Generate a random velocity direction
-                            float fx = velocity_distribution(rngEngine);
-                            float fy = velocity_distribution(rngEngine);
-                            float fz = velocity_distribution(rngEngine);
-                            // Generate a random speed between 0 and the maximum initial speed
-                            float fmagnitude = velocity_magnitude_distribution(rngEngine);
-                            // Use the random speed for the velocity.
-                            vec3Normalize(fx, fy, fz);
-                            vec3Mult(fx, fy, fz, fmagnitude);
-
-                            // Set these for the agent.
-                            instance.setVariable<float>("fx", fx);
-                            instance.setVariable<float>("fy", fy);
-                            instance.setVariable<float>("fz", fz);
+                        /**
+                        * GLOBALS
+                        */
+                        EnvironmentDescription &env = model.Environment();
+                        std::vector<unsigned int> populationSizes;
+                        for (unsigned int pops = 0; pops < numSpecies; pops++) {
+                            populationSizes.push_back(popSize);
                         }
-                        cuda_model.setPopulationData(population);
+                        {
+                            // Population size to generate, if no agents are loaded from disk
+                            env.newProperty("POPULATION_TO_GENERATE", 32768u);
+                            
+                            // Target pop density
+                            double targetVolume = (double)popSize / targetPopDensity;
+                            double sideLength = std::cbrt(targetVolume);
+                            double halfSideLength = sideLength / 2.0;
+                            std::cout << "Using side length: " << sideLength << std::endl;
+
+
+                            // Environment Bounds
+                            env.newProperty("MIN_POSITION", static_cast<float>(-halfSideLength));
+                            env.newProperty("MAX_POSITION", static_cast<float>(halfSideLength));
+
+                            // Initialisation parameter(s)
+                            env.newProperty("MAX_INITIAL_SPEED", 1.0f);
+                            env.newProperty("MIN_INITIAL_SPEED", 0.01f);
+
+                            // Interaction radius
+                            env.newProperty("INTERACTION_RADIUS", 0.1f);
+                            env.newProperty("SEPARATION_RADIUS", 0.005f);
+
+                            // Global Scalers
+                            env.newProperty("TIME_SCALE", 0.0005f);
+                            env.newProperty("GLOBAL_SCALE", 0.15f);
+
+                            // Rule scalers
+                            env.newProperty("STEER_SCALE", 0.65f);
+                            env.newProperty("COLLISION_SCALE", 0.75f);
+                            env.newProperty("MATCH_SCALE", 1.25f);
+                        }
+
+                        {   // Location message
+                            for (unsigned int i = 0; i < populationSizes.size(); i++) {
+                                std::string messageName = "location";
+                                messageName += std::to_string(i);
+                                MsgSpatial3D::Description &message = model.newMessage<MsgSpatial3D>(messageName);
+                                // Set the range and bounds.
+                                message.setRadius(env.getProperty<float>("INTERACTION_RADIUS"));
+                                message.setMin(env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MIN_POSITION"));
+                                message.setMax(env.getProperty<float>("MAX_POSITION"), env.getProperty<float>("MAX_POSITION"), env.getProperty<float>("MAX_POSITION"));
+                                // A message to hold the location of an agent.
+                                message.newVariable<int>("id");
+                                // X Y Z are implicit.
+                                // message.newVariable<float>("x");
+                                // message.newVariable<float>("y");
+                                // message.newVariable<float>("z");
+                                message.newVariable<float>("fx");
+                                message.newVariable<float>("fy");
+                                message.newVariable<float>("fz");
+                            }
+                        }
+                        for (unsigned int i = 0; i < populationSizes.size(); i++) {
+                            {   // Boid agent
+                                std::string agentName("Boid" + std::to_string(i));
+                                AgentDescription &agent = model.newAgent(agentName);
+                                agent.newVariable<int>("id");
+                                agent.newVariable<float>("x");
+                                agent.newVariable<float>("y");
+                                agent.newVariable<float>("z");
+                                agent.newVariable<float>("fx");
+                                agent.newVariable<float>("fy");
+                                agent.newVariable<float>("fz");
+                                std::string messageName = "location";
+                                messageName += std::to_string(i);
+                                std::string outputFuncName = "outputdata";
+                                outputFuncName += std::to_string(i);
+                                std::string inputFuncName = "inputdata";
+                                inputFuncName += std::to_string(i);
+                                agent.newRTCFunction(agentName + outputFuncName, outputdata).setMessageOutput(messageName);
+                                agent.newRTCFunction(agentName + inputFuncName, inputdata).setMessageInput(messageName);
+                            }
+                        }
+
+                        /**
+                        * Control flow
+                        */     
+                        {   // Layer #1
+                            LayerDescription &layer = model.newLayer();
+                            for (unsigned int i = 0; i < populationSizes.size(); i++) {
+                                std::string agentName = "Boid";
+                                agentName += std::to_string(i);
+                                std::string outputFuncName = "outputdata";
+                                outputFuncName += std::to_string(i);
+                                layer.addAgentFunction(agentName, agentName + outputFuncName);
+                            }
+                        }
+                        {   // Layer #2
+                            LayerDescription &layer = model.newLayer();
+                            for (unsigned int i = 0; i < populationSizes.size(); i++) {
+                                std::string agentName = "Boid";
+                                agentName += std::to_string(i);
+                                std::string inputFuncName = "inputdata";
+                                inputFuncName += std::to_string(i);
+                                layer.addAgentFunction(agentName, agentName + inputFuncName);
+                            }
+                        }
+
+
+                        /**
+                        * Create Model Runner
+                        */
+                        CUDASimulation cuda_model(model);
+
+                        /**
+                        * Create visualisation
+                        */
+                #ifdef VISUALISATION
+                        ModelVis &visualisation = cuda_model.getVisualisation();
+                        {
+                            float envWidth = env.getProperty<float>("MAX_POSITION") - env.getProperty<float>("MIN_POSITION");
+                            const float INIT_CAM = env.getProperty<float>("MAX_POSITION") * 1.25f;
+                            visualisation.setInitialCameraLocation(INIT_CAM, INIT_CAM, INIT_CAM);
+                            visualisation.setCameraSpeed(0.002f * envWidth);
+                            for (unsigned int i = 0; i < populationSizes.size(); i++) {
+                                std::string agentName = "Boid";
+                                agentName += std::to_string(i);
+                                auto &circ_agt = visualisation.addAgent(agentName);
+                                // Position vars are named x, y, z; so they are used by default
+                                circ_agt.setModel(Stock::Models::ICOSPHERE);
+                                circ_agt.setModelScale((i+1)*env.getProperty<float>("SEPARATION_RADIUS"));
+                            }
+                        }
+                        visualisation.activate();
+                #endif
+
+                        // Initialisation
+                        cuda_model.initialise(argc, argv);
+
+                        // If no xml model file was is provided, generate a population.
+                        if (cuda_model.getSimulationConfig().input_file.empty()) {
+                            // Set number of steps
+                            auto config = cuda_model.getSimulationConfig();
+                            config.steps = 1000;
+
+                            // Uniformly distribute agents within space, with uniformly distributed initial velocity.
+                            std::mt19937 rngEngine(cuda_model.getSimulationConfig().random_seed);
+                            std::uniform_real_distribution<float> position_distribution(env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MAX_POSITION"));
+                            std::uniform_real_distribution<float> velocity_distribution(-1, 1);
+                            std::uniform_real_distribution<float> velocity_magnitude_distribution(env.getProperty<float>("MIN_INITIAL_SPEED"), env.getProperty<float>("MAX_INITIAL_SPEED"));
+                            
+                            unsigned int agentCounter = 0;
+                            for (unsigned int i = 0; i < populationSizes.size(); i++) {
+                                std::string agentName = "Boid";
+                                agentName += std::to_string(i);
+                                AgentPopulation population(model.Agent(agentName), populationSizes[i]);
+                                for (unsigned int j = 0; j < populationSizes[i]; j++) {
+                                    AgentInstance instance = population.getNextInstance();
+                                    instance.setVariable<int>("id", agentCounter);
+                                    agentCounter++;
+
+                                    // Agent position in space
+                                    instance.setVariable<float>("x", position_distribution(rngEngine));
+                                    instance.setVariable<float>("y", position_distribution(rngEngine));
+                                    instance.setVariable<float>("z", position_distribution(rngEngine));
+
+                                    // Generate a random velocity direction
+                                    float fx = velocity_distribution(rngEngine);
+                                    float fy = velocity_distribution(rngEngine);
+                                    float fz = velocity_distribution(rngEngine);
+                                    // Generate a random speed between 0 and the maximum initial speed
+                                    float fmagnitude = velocity_magnitude_distribution(rngEngine);
+                                    // Use the random speed for the velocity.
+                                    vec3Normalize(fx, fy, fz);
+                                    vec3Mult(fx, fy, fz, fmagnitude);
+
+                                    // Set these for the agent.
+                                    instance.setVariable<float>("fx", fx);
+                                    instance.setVariable<float>("fy", fy);
+                                    instance.setVariable<float>("fz", fz);
+                                }
+                                cuda_model.setPopulationData(population);
+                            }
+                        }
+
+                        /**
+                        * Execution
+                        */
+                        cuda_model.CUDAConfig().inLayerConcurrency = isConcurrent;
+                        std::cout << "In layer concurrency set to: " << cuda_model.CUDAConfig().inLayerConcurrency << std::endl;
+
+                        const auto startTime = std::chrono::system_clock::now();
+                        while (cuda_model.getStepCounter() < 1000 && cuda_model.step()) {
+                        
+                        }
+                        const auto endTime = std::chrono::system_clock::now();
+                        const auto runTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+                        const double averageStepTime = runTime / 1000.0;
+                        
+                        std::cout << "Run complete. Average step time: " << averageStepTime << "ms" << std::endl;
+                        if (isConcurrent) {
+                            concurrentResults[resultsIndex] += averageStepTime;
+                        } else {
+                            serialResults[resultsIndex] += averageStepTime;
+                        }
+                        resultsIndex++;
+
+                        /**
+                        * Export Pop
+                        */
+                        // cuda_model.exportData("end.xml");
+
+            #ifdef VISUALISATION
+                        visualisation.join();
+                        visualisation.close();
+            #endif
                     }
                 }
-
-                /**
-                * Execution
-                */
-                cuda_model.CUDAConfig().inLayerConcurrency = isConcurrent;
-                std::cout << "In layer concurrency set to: " << cuda_model.CUDAConfig().inLayerConcurrency << std::endl;
-
-                const auto startTime = std::chrono::system_clock::now();
-                while (cuda_model.getStepCounter() < 10000 && cuda_model.step()) {
-                
-                }
-                const auto endTime = std::chrono::system_clock::now();
-                const auto runTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
-                const double averageStepTime = runTime / 1000.0;
-                
-                std::cout << "Run complete. Average step time: " << averageStepTime << "ms" << std::endl;
-                if (isConcurrent) {
-                    concurrentResults.push_back(averageStepTime);
-                } else {
-                    serialResults.push_back(averageStepTime);
-                }
-
-                /**
-                * Export Pop
-                */
-                // cuda_model.exportData("end.xml");
-
-    #ifdef VISUALISATION
-                visualisation.join();
-                visualisation.close();
-    #endif
             }
         }
-    }
+        // Compute average results
+        for (unsigned int i = 0; i < concurrentResults.size(); i++) {
+            concurrentResults[i] /= static_cast<double>(experiment.repetitions);
+            serialResults[i] /= static_cast<double>(experiment.repetitions);
+        }
 
-    // Output parameters to file
-    std::ofstream paramsFile("params.csv");
-    if (paramsFile.is_open()) {
-        paramsFile << initialPopSize << "," << finalPopSize << "," << popSizeIncrement << std::endl;
-        paramsFile << initialNumSpecies << "," << finalNumSpecies << "," << numSpeciesIncrement << std::endl;
-    }
+        // Output parameters to file
+        std::ofstream paramsFile("params.csv");
+        if (paramsFile.is_open()) {
+            paramsFile << initialPopSize << "," << finalPopSize << "," << popSizeIncrement << std::endl;
+            paramsFile << initialNumSpecies << "," << finalNumSpecies << "," << numSpeciesIncrement << std::endl;
+        }
 
-    // Output concurrent results to file
-    std::ofstream concurrentOutputFile("concurrent.csv");
-    if (concurrentOutputFile.is_open()) {
-        unsigned int i = 0;
-        for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
-            for (unsigned int numSpecies = initialNumSpecies; numSpecies <= finalNumSpecies; numSpecies+= numSpeciesIncrement) {
-                std::string separator = numSpecies == finalNumSpecies ? "\n" : ", ";
-                concurrentOutputFile << concurrentResults[i] << separator;
-                i++;
+        // Output concurrent results to file
+        std::ofstream concurrentOutputFile("concurrent.csv");
+        if (concurrentOutputFile.is_open()) {
+            unsigned int i = 0;
+            for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
+                for (unsigned int numSpecies = initialNumSpecies; numSpecies <= finalNumSpecies; numSpecies+= numSpeciesIncrement) {
+                    std::string separator = numSpecies == finalNumSpecies ? "\n" : ", ";
+                    concurrentOutputFile << concurrentResults[i] << separator;
+                    i++;
+                }
             }
         }
-    }
 
-    // Output serial results to file
-    std::ofstream serialOutputFile("serial.csv");
-    if (serialOutputFile.is_open()) {
-        unsigned int i = 0;
-        for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
-            for (unsigned int numSpecies = initialNumSpecies; numSpecies <= finalNumSpecies; numSpecies+= numSpeciesIncrement) {
-                std::string separator = numSpecies == finalNumSpecies ? "\n" : ", ";
-                serialOutputFile << serialResults[i] << separator;
-                i++;
+        // Output serial results to file
+        std::ofstream serialOutputFile("serial.csv");
+        if (serialOutputFile.is_open()) {
+            unsigned int i = 0;
+            for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
+                for (unsigned int numSpecies = initialNumSpecies; numSpecies <= finalNumSpecies; numSpecies+= numSpeciesIncrement) {
+                    std::string separator = numSpecies == finalNumSpecies ? "\n" : ", ";
+                    serialOutputFile << serialResults[i] << separator;
+                    i++;
+                }
             }
         }
     }
