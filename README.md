@@ -1,15 +1,27 @@
-# FLAMEGPU2 Template Example
-This repository acts as an example to be used as a template for creating standalone FLAMEGPU2 projects.
+# FLAMEGPU2 Concurrency Experiments
+This repository contains the Figures XYZ shown in the paper/talk [Link to talk/paper](), along with the code to generate them. The code demonstrates the effect and scaling of the concurrency feature of the FLAMEGPU2 agent-based modelling framework. Please note that generated figures may differ slightly as a result of the stochastic nature of the simulations and hardware differences.
+
+# Figures
+
+## Figure 2.1 - Figure title
+![Figure 2.1](./build/results/placeholder.png)
+*__Figure 2.1__ This figure shows ...*
+
+Generated using an `NVIDIA V100` GPU.
+
+## Figure 2.2 - Figure title 
+![Figure 2.2](./build/results/placeholder.png)
+*__Figure 2.2__ caption* 
+
+Generated using an `NVIDIA V100` GPU.
+
+# Building the Experiments
 
 [FLAMEGPU2](https://github.com/FLAMEGPU/FLAMEGPU2_dev) is downloaded via CMake and configured as a dependency of the project.
-
-Currently, it uses the version of FLAMEGPU2 from master, this can be changed locally by setting the CMake variable `FLAMEGPU2_Version` to point to a different git branch or tag. You can also change it for all users, by changing `cmake/flamegpu2.cmake:5` which provides the default value.
 
 ## Dependencies
 
 The dependencies below are required for building FLAME GPU 2.
-
-Only documentation can be built without the required dependencies (however Doxygen is still required).
 
 ### Required
 
@@ -43,15 +55,7 @@ make -j8
 
 The option `-j8` enables parallel compilation using upto 8 threads, this is recommended to improve build times.
 
-By default a `Makefile` for the `Release` build configuration will be generated.
-
-Alternatively, using `-DCMAKE_BUILD_TYPE=`, `Debug` or `Profile` build configurations can be generated:
- 
-```
-mkdir -p build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Profile
-make -j8
-```
+By default a `Makefile` for the `Release` build configuration will be generated. This is the configuration which was used to generate the results for the paper/talk.
 
 ### Windows
 
@@ -66,3 +70,20 @@ mkdir build && cd build
 cmake .. -A x64
 ALL_BUILD.sln
 ```
+
+# Running the Experiments
+By default all experiments are run and data will be generated to create all of the figures.
+
+To run the experiments, run the generated binary file which will be found in `bin/{platform}/Release/`
+
+# Generating Graphs
+
+## Required
+* [Python](https://www.python.org/downloads/) >= 3.0: Required for generating graphs
+
+## Graph Generation
+Run the command 
+```
+python3 graphs.py
+``` 
+from the `build` folder. This will generate the figures in the `figures` folder
