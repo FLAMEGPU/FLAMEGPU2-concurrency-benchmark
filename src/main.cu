@@ -588,9 +588,9 @@ int main(int argc, const char ** argv) {
 
     Experiment smallFixedPopBruteForce("Small Fixed Pop Brute Force", 512, 512, 512, 1, 16, 1, repetitions, 1024, false);
     Experiment smallPopsBruteForce("Small Pops Brute Force", 128, 1024, 128, 1, 8, 1, repetitions, 1024, false);
-    Experiment largePopsBruteForce("Large Pops Brute Force", 1024, 1024, 1024, 1, 8, 1, 1, 1024, false);
+    Experiment largePopsBruteForce("Large Pops Brute Force", 1024, 8192, 1024, 1, 8, 1, repetitions, 1024, false);
 
-    std::vector<Experiment> experiments = {largePops, largePopsBruteForce};
+    std::vector<Experiment> experiments = {smallFixedPop, smallPops, largePops, deviceMaxed, smallFixedPopBruteForce, smallPopsBruteForce, largePopsBruteForce};
     
     for (Experiment experiment : experiments) {
         
