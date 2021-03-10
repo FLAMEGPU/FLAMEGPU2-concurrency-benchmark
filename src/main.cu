@@ -579,17 +579,18 @@ typedef struct Experiment {
 
 int main(int argc, const char ** argv) {
 
-    unsigned int repetitions = 1;
-    Experiment smallFixedPop("Small Fixed Pop", 512, 512, 512, 1, 16, 1, repetitions, 1024, true);
-    Experiment smallPops("Small Pops", 128, 1024, 128, 1, 8, 1, repetitions, 1024, true);
-    Experiment largePops("Large Pops", 1024, 8192, 1024, 1, 8, 1, repetitions, 1024, true);
-    Experiment deviceMaxed("Device Maxed", 100000, 100000, 100000, 1, 8, 1, 1, 4096, true);
+    unsigned int repetitions = 3;
+    Experiment smallFixedPop("Small_Fixed_Pop", 512, 512, 512, 1, 32, 1, repetitions, 1024, true);
+    Experiment smallPops("Small_Pops", 128, 1024, 128, 1, 32, 1, repetitions, 1024, true);
+    Experiment largePops("Large_Pops", 1024, 8192, 1024, 1, 32, 1, repetitions, 1024, true);
+    Experiment deviceMaxed("Device_Maxed", 100000, 100000, 100000, 1, 8, 1, 1, 4096, true);
     //Experiment sweepPopDensity("Sweep Population Density", 4096, 4096, 4096, 1, 8, 1);
 
-    Experiment smallFixedPopBruteForce("Small Fixed Pop Brute Force", 512, 512, 512, 1, 16, 1, repetitions, 1024, false);
-    Experiment smallPopsBruteForce("Small Pops Brute Force", 128, 1024, 128, 1, 8, 1, repetitions, 1024, false);
-    Experiment largePopsBruteForce("Large Pops Brute Force", 1024, 8192, 1024, 1, 8, 1, repetitions, 1024, false);
+    Experiment smallFixedPopBruteForce("Small_Fixed_Pop_Brute_Force", 512, 512, 512, 1, 32, 1, repetitions, 1024, false);
+    Experiment smallPopsBruteForce("Small_Pops_Brute_Force", 128, 1024, 128, 1, 32, 1, repetitions, 1024, false);
+    Experiment largePopsBruteForce("Large_Pops_Brute_Force", 1024, 8192, 1024, 1, 32, 1, repetitions, 1024, false);
 
+    //std::vector<Experiment> experiments = {smallPops};
     std::vector<Experiment> experiments = {smallFixedPop, smallPops, largePops, deviceMaxed, smallFixedPopBruteForce, smallPopsBruteForce, largePopsBruteForce};
     
     for (Experiment experiment : experiments) {
@@ -615,6 +616,11 @@ int main(int argc, const char ** argv) {
                 concurrentResults.push_back(0.0);
             }
         }
+
+        // Pandas
+        std::string csvFileName = experiment.title + ".csv";
+        std::ofstream csv(csvFileName, std::ios::app);
+        csv << "is_concurrent, repetition, pop_size, num_species, ms_step_mean" << std::endl;
         
         for (unsigned int isConcurrent = 0; isConcurrent <= 1; isConcurrent++) {
             for (unsigned int repetition = 0; repetition < experiment.repetitions; repetition++) {
@@ -846,10 +852,8 @@ int main(int argc, const char ** argv) {
                         }
                         resultsIndex++;
 
-                        /**
-                        * Export Pop
-                        */
-                        // cuda_model.exportData("end.xml");
+                        //csv << "is_concurrent,repetition,pop_size,num_species,ms_step_mean" << std::endl;
+                        csv << isConcurrent << "," << repetition << "," << popSize << "," << numSpecies << "," << averageStepTime << std::endl;
 
             #ifdef VISUALISATION
                         visualisation.join();
@@ -859,6 +863,7 @@ int main(int argc, const char ** argv) {
                 }
             }
         }
+
         // Compute average results
         for (unsigned int i = 0; i < concurrentResults.size(); i++) {
             concurrentResults[i] /= static_cast<double>(experiment.repetitions);
