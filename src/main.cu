@@ -579,16 +579,18 @@ typedef struct Experiment {
 
 int main(int argc, const char ** argv) {
 
-    Experiment smallFixedPop("Small Fixed Pop", 512, 512, 512, 1, 16, 1, 5, 1024, true);
-    Experiment smallPops("Small Pops", 128, 1024, 128, 1, 8, 1, 5, 1024, true);
-    Experiment largePops("Large Pops", 1024, 8192, 1024, 1, 8, 1, 5, 1024, true);
+    unsigned int repetitions = 1;
+    Experiment smallFixedPop("Small Fixed Pop", 512, 512, 512, 1, 16, 1, repetitions, 1024, true);
+    Experiment smallPops("Small Pops", 128, 1024, 128, 1, 8, 1, repetitions, 1024, true);
+    Experiment largePops("Large Pops", 1024, 8192, 1024, 1, 8, 1, repetitions, 1024, true);
     Experiment deviceMaxed("Device Maxed", 100000, 100000, 100000, 1, 8, 1, 1, 4096, true);
     //Experiment sweepPopDensity("Sweep Population Density", 4096, 4096, 4096, 1, 8, 1);
 
+    Experiment smallFixedPopBruteForce("Small Fixed Pop Brute Force", 512, 512, 512, 1, 16, 1, repetitions, 1024, false);
+    Experiment smallPopsBruteForce("Small Pops Brute Force", 128, 1024, 128, 1, 8, 1, repetitions, 1024, false);
     Experiment largePopsBruteForce("Large Pops Brute Force", 1024, 1024, 1024, 1, 8, 1, 1, 1024, false);
-    Experiment largePopsSpatial("Large Pops Spatial", 1024, 1024, 1024, 1, 8, 1, 1, 1024, true);
 
-    std::vector<Experiment> experiments = {largePopsBruteForce};
+    std::vector<Experiment> experiments = {largePops, largePopsBruteForce};
     
     for (Experiment experiment : experiments) {
         
@@ -864,14 +866,14 @@ int main(int argc, const char ** argv) {
         }
 
         // Output parameters to file
-        std::ofstream paramsFile("params.csv");
+        std::ofstream paramsFile("results/" + experiment.title + "/params.csv");
         if (paramsFile.is_open()) {
             paramsFile << initialPopSize << "," << finalPopSize << "," << popSizeIncrement << std::endl;
             paramsFile << initialNumSpecies << "," << finalNumSpecies << "," << numSpeciesIncrement << std::endl;
         }
 
         // Output concurrent results to file
-        std::ofstream concurrentOutputFile("concurrent.csv");
+        std::ofstream concurrentOutputFile("results/" + experiment.title + "/concurrent.csv");
         if (concurrentOutputFile.is_open()) {
             unsigned int i = 0;
             for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
@@ -884,7 +886,7 @@ int main(int argc, const char ** argv) {
         }
 
         // Output serial results to file
-        std::ofstream serialOutputFile("serial.csv");
+        std::ofstream serialOutputFile("results/" + experiment.title + "/serial.csv");
         if (serialOutputFile.is_open()) {
             unsigned int i = 0;
             for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
