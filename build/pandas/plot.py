@@ -279,7 +279,8 @@ MANUAL_PRETTY_CSV_KEY_MAP = {
     "env_volume": "Environment Volume",
     "num_species" : "Number of Species",
     "pop_size" : "Population Size (per species)",
-    "is_concurrent" : "Concurrency Enabled"
+    "is_concurrent" : "Concurrency Enabled",
+    "speedup" : "Speedup"
 }
 
 def pretty_csv_key(csv_key):
