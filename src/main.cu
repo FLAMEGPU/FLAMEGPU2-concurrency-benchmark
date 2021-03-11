@@ -590,8 +590,11 @@ int main(int argc, const char ** argv) {
     Experiment smallPopsBruteForce("Small_Pops_Brute_Force", 128, 1024, 128, 1, 32, 1, repetitions, 1024, false);
     Experiment largePopsBruteForce("Large_Pops_Brute_Force", 1024, 8192, 1024, 1, 32, 1, repetitions, 1024, false);
 
-    //std::vector<Experiment> experiments = {smallPops};
-    std::vector<Experiment> experiments = {smallFixedPop, smallPops, largePops, deviceMaxed, smallFixedPopBruteForce, smallPopsBruteForce, largePopsBruteForce};
+    Experiment largePopsFalloff("Large_Pops_Falloff", 8192, 8192, 8192, 1, 257, 16, 1, 1024, true);
+    Experiment largePopsFalloffBruteForce("Large_Pops_Falloff_Brute_Force", 2048, 8192, 2048, 1, 257, 8, 1, 1024, false);
+
+    std::vector<Experiment> experiments = {largePopsFalloffBruteForce};
+    //std::vector<Experiment> experiments = {smallFixedPop, smallPops, largePops, deviceMaxed, smallFixedPopBruteForce, smallPopsBruteForce, largePopsBruteForce};
     
     for (Experiment experiment : experiments) {
         
@@ -792,7 +795,7 @@ int main(int argc, const char ** argv) {
                         // If no xml model file was is provided, generate a population.
                         if (cuda_model.getSimulationConfig().input_file.empty()) {
                             // Set number of steps
-                            cuda_model.SimulationConfig().steps = 1000;
+                            cuda_model.SimulationConfig().steps = 100;
 
                             // Uniformly distribute agents within space, with uniformly distributed initial velocity.
                             std::mt19937 rngEngine(cuda_model.getSimulationConfig().random_seed);
@@ -804,9 +807,9 @@ int main(int argc, const char ** argv) {
                             for (unsigned int i = 0; i < populationSizes.size(); i++) {
                                 std::string agentName = "Boid";
                                 agentName += std::to_string(i);
-                                AgentPopulation population(model.Agent(agentName), populationSizes[i]);
+                                AgentVector population(model.Agent(agentName), populationSizes[i]);
                                 for (unsigned int j = 0; j < populationSizes[i]; j++) {
-                                    AgentInstance instance = population.getNextInstance();
+                                    AgentVector::Agent instance = population[i];
                                     instance.setVariable<int>("id", agentCounter);
                                     agentCounter++;
 
