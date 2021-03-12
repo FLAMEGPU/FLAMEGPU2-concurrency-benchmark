@@ -3,15 +3,27 @@ This repository contains the Figures XYZ shown in the paper/talk [Link to talk/p
 
 # Figures
 
-## Figure 2.1 - Figure title
-![Figure 2.1](./build/results/placeholder.png)
-*__Figure 2.1__ This figure shows ...*
+## Small Populations Speedup (Brute force)
+![Figure 2.1](./results/figures/speedup--small_Pops_brute_force.png)
+*__Figure__ This figure shows ...*
 
 Generated using an `NVIDIA V100` GPU.
 
-## Figure 2.2 - Figure title 
-![Figure 2.2](./build/results/placeholder.png)
-*__Figure 2.2__ caption* 
+## Small Populations Speedup (Spatial)
+![Figure 2.1](./results/figures/speedup--small_pops.png)
+*__Figure__ This figure shows ...*
+
+Generated using an `NVIDIA V100` GPU.
+
+## Large Populations Speedup - Speedup Falloff (Brute force)
+![Figure 2.1](./results/figures/speedup--large_pops_falloff_brute_force.png)
+*__Figure__ This figure shows ...*
+
+Generated using an `NVIDIA V100` GPU.
+
+## Device Maxed
+![Figure 2.1](./results/figures/Device--device_maxed.png)
+*__Figure__ This figure shows ...*
 
 Generated using an `NVIDIA V100` GPU.
 
