@@ -551,7 +551,8 @@ typedef struct Experiment {
         unsigned int initialNumSpecies, unsigned int finalNumSpecies, unsigned int numSpeciesIncrement,
         unsigned int repetitions,
         double targetPopDensity,
-        bool spatial) {
+        bool spatial,
+        unsigned int steps) {
             this->title = title;
             this->initialPopSize = initialPopSize;
             this->finalPopSize = finalPopSize;
@@ -562,6 +563,7 @@ typedef struct Experiment {
             this->repetitions = repetitions;
             this->targetPopDensity = targetPopDensity;
             this->spatial = spatial;
+            this->steps = steps;
         }
     std::string title;
     unsigned int initialPopSize = 100000;
@@ -575,23 +577,24 @@ typedef struct Experiment {
     unsigned int repetitions = 1;
     double targetPopDensity = 1024;
     bool spatial = true;
+    unsigned int steps = 1000;
 } Experiment;
 
 int main(int argc, const char ** argv) {
 
     unsigned int repetitions = 3;
-    Experiment smallFixedPop("Small_Fixed_Pop", 512, 512, 512, 1, 32, 1, repetitions, 1024, true);
-    Experiment smallPops("Small_Pops", 128, 1024, 128, 1, 32, 1, repetitions, 1024, true);
-    Experiment largePops("Large_Pops", 1024, 8192, 1024, 1, 32, 1, repetitions, 1024, true);
-    Experiment deviceMaxed("Device_Maxed", 100000, 100000, 100000, 1, 8, 1, 1, 4096, true);
+    Experiment smallFixedPop("Small_Fixed_Pop", 512, 512, 512, 1, 32, 1, repetitions, 1024, true, 1000);
+    Experiment smallPops("Small_Pops", 128, 1024, 128, 1, 32, 1, repetitions, 1024, true, 1000);
+    Experiment largePops("Large_Pops", 1024, 8192, 1024, 1, 32, 1, repetitions, 1024, true, 1000);
+    Experiment deviceMaxed("Device_Maxed", 100000, 100000, 100000, 1, 8, 1, 1, 4096, true, 1000);
     //Experiment sweepPopDensity("Sweep Population Density", 4096, 4096, 4096, 1, 8, 1);
 
-    Experiment smallFixedPopBruteForce("Small_Fixed_Pop_Brute_Force", 512, 512, 512, 1, 32, 1, repetitions, 1024, false);
-    Experiment smallPopsBruteForce("Small_Pops_Brute_Force", 128, 1024, 128, 1, 32, 1, repetitions, 1024, false);
-    Experiment largePopsBruteForce("Large_Pops_Brute_Force", 1024, 8192, 1024, 1, 32, 1, repetitions, 1024, false);
+    Experiment smallFixedPopBruteForce("Small_Fixed_Pop_Brute_Force", 512, 512, 512, 1, 32, 1, repetitions, 1024, false, 1000);
+    Experiment smallPopsBruteForce("Small_Pops_Brute_Force", 128, 1024, 128, 1, 32, 1, repetitions, 1024, false, 1000);
+    Experiment largePopsBruteForce("Large_Pops_Brute_Force", 1024, 8192, 1024, 1, 32, 1, repetitions, 1024, false, 1000);
 
-    Experiment largePopsFalloff("Large_Pops_Falloff", 8192, 8192, 8192, 1, 257, 16, 1, 1024, true);
-    Experiment largePopsFalloffBruteForce("Large_Pops_Falloff_Brute_Force", 2048, 8192, 2048, 1, 257, 8, 1, 1024, false);
+    Experiment largePopsFalloff("Large_Pops_Falloff", 8192, 8192, 8192, 1, 257, 16, 1, 1024, true, 100);
+    Experiment largePopsFalloffBruteForce("Large_Pops_Falloff_Brute_Force", 2048, 8192, 2048, 1, 257, 8, 1, 1024, false, 100);
 
     std::vector<Experiment> experiments = {largePopsFalloffBruteForce};
     //std::vector<Experiment> experiments = {smallFixedPop, smallPops, largePops, deviceMaxed, smallFixedPopBruteForce, smallPopsBruteForce, largePopsBruteForce};
@@ -621,7 +624,7 @@ int main(int argc, const char ** argv) {
         }
 
         // Pandas
-        std::string csvFileName = experiment.title + ".csv";
+        std::string csvFileName = "../results/" + experiment.title + ".csv";
         std::ofstream csv(csvFileName, std::ios::app);
         csv << "is_concurrent, repetition, pop_size, num_species, ms_step_mean" << std::endl;
         
@@ -795,7 +798,7 @@ int main(int argc, const char ** argv) {
                         // If no xml model file was is provided, generate a population.
                         if (cuda_model.getSimulationConfig().input_file.empty()) {
                             // Set number of steps
-                            cuda_model.SimulationConfig().steps = 100;
+                            cuda_model.SimulationConfig().steps = experiment.steps;
 
                             // Uniformly distribute agents within space, with uniformly distributed initial velocity.
                             std::mt19937 rngEngine(cuda_model.getSimulationConfig().random_seed);
