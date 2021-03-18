@@ -29,7 +29,7 @@ Generated using an `NVIDIA V100` GPU.
 
 # Building the Experiments
 
-[FLAMEGPU2](https://github.com/FLAMEGPU/FLAMEGPU2_dev) is downloaded via CMake and configured as a dependency of the project.
+[FLAMEGPU2](https://github.com/FLAMEGPU/FLAMEGPU2) is downloaded via CMake and configured as a dependency of the project.
 
 ## Dependencies
 
@@ -53,7 +53,7 @@ The dependencies below are required for building FLAME GPU 2.
 
 FLAME GPU 2 uses [CMake](https://cmake.org/), as a cross-platform process, for configuring and generating build directives, e.g. `Makefile` or `.vcxproj`. This is used to build the FLAMEGPU2 library, examples, tests and documentation.
 
-Below the core commands are provided, for the full guide refer to the main [FLAMEGPU2 guide](https://github.com/FLAMEGPU/FLAMEGPU2_dev/blob/master/README.md).
+Below the core commands are provided, for the full guide refer to the main [FLAMEGPU2 guide](https://github.com/FLAMEGPU/FLAMEGPU2/blob/master/README.md).
 
 ### Linux
 
