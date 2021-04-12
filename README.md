@@ -1,29 +1,29 @@
 # FLAMEGPU2 Concurrency Experiments
-This repository contains the Figures XYZ shown in the paper/talk [Link to talk/paper](), along with the code to generate them. The code demonstrates the effect and scaling of the concurrency feature of the FLAMEGPU2 agent-based modelling framework. Please note that generated figures may differ slightly as a result of the stochastic nature of the simulations and hardware differences.
+This repository contains the figures relating to concurrency shown in the talk *Simulate the World and Everything in It: Complex Systems Simulations with FGPU2* given by Paul Richmond at [GTC 2021](https://www.nvidia.com/en-us/gtc/topics/developer-tools/), along with the code to generate them. The code demonstrates the effect and scaling of the concurrency feature of the FLAMEGPU2 agent-based modelling framework. Please note that generated figures may differ slightly as a result of the stochastic nature of the simulations and hardware differences.
 
 # Figures
 
 ## Small Populations Speedup (Brute force)
-![Figure 2.1](./results/figures/speedup--small_Pops_brute_force.png)
-*__Figure__ This figure shows ...*
+![Small populations brute force](./results/figures/speedup--small_Pops_brute_force.png)
+*__Small populations brute force__ This figure shows the speedup gained by enabling concurrent execution of the agent functions of different species in a brute force messaging boids model.*
 
 Generated using an `NVIDIA V100` GPU.
 
 ## Small Populations Speedup (Spatial)
 ![Figure 2.1](./results/figures/speedup--small_pops.png)
-*__Figure__ This figure shows ...*
+*__Small populations spatial__ This figure shows the speedup gained by enabling concurrent execution of the agent functions of different species in a spatial messaging boids model. The maximum speedup is not as high as the brute force model, as the kernels have less work to do as a result of the spatial message partitioning.*
 
 Generated using an `NVIDIA V100` GPU.
 
 ## Large Populations Speedup - Speedup Falloff (Brute force)
 ![Figure 2.1](./results/figures/speedup--large_pops_falloff_brute_force.png)
-*__Figure__ This figure shows ...*
+*__Large populations brute force__ This figure shows how the speedup scales with number of species and population size for larger populations.*
 
 Generated using an `NVIDIA V100` GPU.
 
 ## Device Maxed
 ![Figure 2.1](./results/figures/Device--device_maxed.png)
-*__Figure__ This figure shows ...*
+*__Device maxed__ This figure shows that for sufficiently large species which fully occupy the device, there is no significant difference in performance.*
 
 Generated using an `NVIDIA V100` GPU.
 
