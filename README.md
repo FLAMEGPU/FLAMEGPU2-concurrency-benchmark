@@ -7,25 +7,25 @@ This repository contains the figures relating to concurrency shown in the talk *
 ![Small populations brute force](./results/figures/speedup--small_Pops_brute_force.png)
 *__Small populations brute force__ This figure shows the speedup gained by enabling concurrent execution of the agent functions of different species in a brute force messaging boids model.*
 
-Generated using an `NVIDIA V100` GPU.
+Generated using an `NVIDIA Titan V` GPU.
 
 ## Small Populations Speedup (Spatial)
 ![Figure 2.1](./results/figures/speedup--small_pops.png)
 *__Small populations spatial__ This figure shows the speedup gained by enabling concurrent execution of the agent functions of different species in a spatial messaging boids model. The maximum speedup is not as high as the brute force model, as the kernels have less work to do as a result of the spatial message partitioning.*
 
-Generated using an `NVIDIA V100` GPU.
+Generated using an `NVIDIA Titan V` GPU.
 
 ## Large Populations Speedup - Speedup Falloff (Brute force)
 ![Figure 2.1](./results/figures/speedup--large_pops_falloff_brute_force.png)
 *__Large populations brute force__ This figure shows how the speedup scales with number of species and population size for larger populations.*
 
-Generated using an `NVIDIA V100` GPU.
+Generated using an `NVIDIA Titan V` GPU.
 
 ## Device Maxed
 ![Figure 2.1](./results/figures/Device--device_maxed.png)
 *__Device maxed__ This figure shows that for sufficiently large species which fully occupy the device, there is no significant difference in performance.*
 
-Generated using an `NVIDIA V100` GPU.
+Generated using an `NVIDIA Titan V` GPU.
 
 # Building the Experiments
 
