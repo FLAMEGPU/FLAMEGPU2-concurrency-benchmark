@@ -86,7 +86,7 @@ ALL_BUILD.sln
 # Running the Experiments
 By default all experiments are run and data will be generated to create all of the figures.
 
-To run the experiments, run the generated binary file which will be found in `bin/{platform}/Release/`
+To run the experiments, run the generated binary file which will be found in `bin/Release/`
 
 # Generating Graphs
 

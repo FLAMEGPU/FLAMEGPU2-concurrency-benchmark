@@ -4,7 +4,7 @@
 #include <fstream>
 #include <chrono>
 
-#include "flamegpu/flame_api.h"
+#include "flamegpu/flamegpu.h"
 
 /**
  * FLAME GPU 2 implementation of the Boids model, using spatial3D messaging.
@@ -117,7 +117,7 @@ FLAMEGPU_HOST_DEVICE_FUNCTION void clampPosition(float &x, float &y, float &z, c
  * outputdata agent function for Boid agents, which outputs publicly visible properties to a message list
  */
 const char* outputdata = R"###(
-FLAMEGPU_AGENT_FUNCTION(outputdata, MsgNone, MsgSpatial3D) {
+FLAMEGPU_AGENT_FUNCTION(outputdata, flamegpu::MsgNone, flamegpu::MsgSpatial3D) {
     // Output each agents publicly visible properties.
     FLAMEGPU->message_out.setVariable<int>("id", FLAMEGPU->getVariable<int>("id"));
     FLAMEGPU->message_out.setVariable<float>("x", FLAMEGPU->getVariable<float>("x"));
@@ -126,12 +126,12 @@ FLAMEGPU_AGENT_FUNCTION(outputdata, MsgNone, MsgSpatial3D) {
     FLAMEGPU->message_out.setVariable<float>("fx", FLAMEGPU->getVariable<float>("fx"));
     FLAMEGPU->message_out.setVariable<float>("fy", FLAMEGPU->getVariable<float>("fy"));
     FLAMEGPU->message_out.setVariable<float>("fz", FLAMEGPU->getVariable<float>("fz"));
-    return ALIVE;
+    return flamegpu::ALIVE;
 }
 )###";
 
 const char* outputdataBruteForce = R"###(
-    FLAMEGPU_AGENT_FUNCTION(outputdata, MsgNone, MsgBruteForce) {
+    FLAMEGPU_AGENT_FUNCTION(outputdata, flamegpu::MsgNone, flamegpu::MsgBruteForce) {
         // Output each agents publicly visible properties.
         FLAMEGPU->message_out.setVariable<int>("id", FLAMEGPU->getVariable<int>("id"));
         FLAMEGPU->message_out.setVariable<float>("x", FLAMEGPU->getVariable<float>("x"));
@@ -140,7 +140,7 @@ const char* outputdataBruteForce = R"###(
         FLAMEGPU->message_out.setVariable<float>("fx", FLAMEGPU->getVariable<float>("fx"));
         FLAMEGPU->message_out.setVariable<float>("fy", FLAMEGPU->getVariable<float>("fy"));
         FLAMEGPU->message_out.setVariable<float>("fz", FLAMEGPU->getVariable<float>("fz"));
-        return ALIVE;
+        return flamegpu::ALIVE;
     }
     )###";
 /**
@@ -187,7 +187,7 @@ FLAMEGPU_HOST_DEVICE_FUNCTION void clampPosition(float &x, float &y, float &z, c
     z = (z > MAX_POSITION)? MAX_POSITION: z;
 }
 // Agent function
-FLAMEGPU_AGENT_FUNCTION(inputdata, MsgSpatial3D, MsgNone) {
+FLAMEGPU_AGENT_FUNCTION(inputdata, flamegpu::MsgSpatial3D, flamegpu::MsgNone) {
 
     // Agent properties in local register
     int id = FLAMEGPU->getVariable<int>("id");
@@ -227,9 +227,6 @@ FLAMEGPU_AGENT_FUNCTION(inputdata, MsgSpatial3D, MsgNone) {
             const float message_x = message.getVariable<float>("x");
             const float message_y = message.getVariable<float>("y");
             const float message_z = message.getVariable<float>("z");
-            const float message_fx = message.getVariable<float>("fx");
-            const float message_fy = message.getVariable<float>("fy");
-            const float message_fz = message.getVariable<float>("fz");
 
             // Check interaction radius
             float separation = vec3Length(agent_x - message_x, agent_y - message_y, agent_z - message_z);
@@ -242,6 +239,9 @@ FLAMEGPU_AGENT_FUNCTION(inputdata, MsgSpatial3D, MsgNone) {
                 perceived_count++;
 
                 // Update percieved velocity matching
+                const float message_fx = message.getVariable<float>("fx");
+                const float message_fy = message.getVariable<float>("fy");
+                const float message_fz = message.getVariable<float>("fz");
                 global_velocity_x += message_fx;
                 global_velocity_y += message_fy;
                 global_velocity_z += message_fz;
@@ -341,7 +341,7 @@ FLAMEGPU_AGENT_FUNCTION(inputdata, MsgSpatial3D, MsgNone) {
     FLAMEGPU->setVariable<float>("fy", agent_fy);
     FLAMEGPU->setVariable<float>("fz", agent_fz);
 
-    return ALIVE;
+    return flamegpu::ALIVE;
 }
 )###";
 
@@ -386,7 +386,7 @@ const char* inputdataBruteForce = R"###(
         z = (z > MAX_POSITION)? MAX_POSITION: z;
     }
     // Agent function
-    FLAMEGPU_AGENT_FUNCTION(inputdata, MsgBruteForce, MsgNone) {
+    FLAMEGPU_AGENT_FUNCTION(inputdata, flamegpu::MsgBruteForce, flamegpu::MsgNone) {
     
         // Agent properties in local register
         int id = FLAMEGPU->getVariable<int>("id");
@@ -426,10 +426,7 @@ const char* inputdataBruteForce = R"###(
                 const float message_x = message.getVariable<float>("x");
                 const float message_y = message.getVariable<float>("y");
                 const float message_z = message.getVariable<float>("z");
-                const float message_fx = message.getVariable<float>("fx");
-                const float message_fy = message.getVariable<float>("fy");
-                const float message_fz = message.getVariable<float>("fz");
-    
+
                 // Check interaction radius
                 float separation = vec3Length(agent_x - message_x, agent_y - message_y, agent_z - message_z);
     
@@ -441,6 +438,9 @@ const char* inputdataBruteForce = R"###(
                     perceived_count++;
     
                     // Update percieved velocity matching
+                    const float message_fx = message.getVariable<float>("fx");
+                    const float message_fy = message.getVariable<float>("fy");
+                    const float message_fz = message.getVariable<float>("fz");
                     global_velocity_x += message_fx;
                     global_velocity_y += message_fy;
                     global_velocity_z += message_fz;
@@ -540,7 +540,7 @@ const char* inputdataBruteForce = R"###(
         FLAMEGPU->setVariable<float>("fy", agent_fy);
         FLAMEGPU->setVariable<float>("fz", agent_fz);
     
-        return ALIVE;
+        return flamegpu::ALIVE;
     }
     )###";
 
@@ -634,12 +634,12 @@ int main(int argc, const char ** argv) {
                 for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
                     for (unsigned int numSpecies = initialNumSpecies; numSpecies <= finalNumSpecies; numSpecies+= numSpeciesIncrement) {
                         std::cout << "Staring run with popSize: " << popSize << ", species: " << numSpecies << std::endl;
-                        ModelDescription model("Boids_Concurrency");
+                        flamegpu::ModelDescription model("Boids_Concurrency");
 
                         /**
                         * GLOBALS
                         */
-                        EnvironmentDescription &env = model.Environment();
+                        flamegpu::EnvironmentDescription &env = model.Environment();
                         std::vector<unsigned int> populationSizes;
                         for (unsigned int pops = 0; pops < numSpecies; pops++) {
                             populationSizes.push_back(popSize);
@@ -679,7 +679,7 @@ int main(int argc, const char ** argv) {
                                 std::string messageName = "location";
                                 messageName += std::to_string(i);
                                 if (experiment.spatial) {
-                                    MsgSpatial3D::Description &message = model.newMessage<MsgSpatial3D>(messageName);
+                                    flamegpu::MsgSpatial3D::Description &message = model.newMessage<flamegpu::MsgSpatial3D>(messageName);
                                     // Set the range and bounds.
                                     message.setRadius(env.getProperty<float>("INTERACTION_RADIUS"));
                                     message.setMin(env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MIN_POSITION"));
@@ -694,7 +694,7 @@ int main(int argc, const char ** argv) {
                                     message.newVariable<float>("fy");
                                     message.newVariable<float>("fz");
                                 } else {
-                                    MsgBruteForce::Description &message = model.newMessage<MsgBruteForce>(messageName);
+                                    flamegpu::MsgBruteForce::Description &message = model.newMessage<flamegpu::MsgBruteForce>(messageName);
                                     // A message to hold the location of an agent.
                                     message.newVariable<int>("id");
                                     message.newVariable<float>("x");
@@ -710,7 +710,7 @@ int main(int argc, const char ** argv) {
                         for (unsigned int i = 0; i < populationSizes.size(); i++) {
                             {   // Boid agent
                                 std::string agentName("Boid" + std::to_string(i));
-                                AgentDescription &agent = model.newAgent(agentName);
+                                flamegpu::AgentDescription &agent = model.newAgent(agentName);
                                 agent.newVariable<int>("id");
                                 agent.newVariable<float>("x");
                                 agent.newVariable<float>("y");
@@ -744,7 +744,7 @@ int main(int argc, const char ** argv) {
                         * Control flow
                         */     
                         {   // Layer #1
-                            LayerDescription &layer = model.newLayer();
+                            flamegpu::LayerDescription &layer = model.newLayer();
                             for (unsigned int i = 0; i < populationSizes.size(); i++) {
                                 std::string agentName = "Boid";
                                 agentName += std::to_string(i);
@@ -754,7 +754,7 @@ int main(int argc, const char ** argv) {
                             }
                         }
                         {   // Layer #2
-                            LayerDescription &layer = model.newLayer();
+                            flamegpu::LayerDescription &layer = model.newLayer();
                             for (unsigned int i = 0; i < populationSizes.size(); i++) {
                                 std::string agentName = "Boid";
                                 agentName += std::to_string(i);
@@ -768,13 +768,13 @@ int main(int argc, const char ** argv) {
                         /**
                         * Create Model Runner
                         */
-                        CUDASimulation cuda_model(model);
+                        flamegpu::CUDASimulation cuda_model(model);
 
                         /**
                         * Create visualisation
                         */
                 #ifdef VISUALISATION
-                        ModelVis &visualisation = cuda_model.getVisualisation();
+                        flamegpu::visualiser::ModelVis &visualisation = cuda_model.getVisualisation();
                         {
                             float envWidth = env.getProperty<float>("MAX_POSITION") - env.getProperty<float>("MIN_POSITION");
                             const float INIT_CAM = env.getProperty<float>("MAX_POSITION") * 1.25f;
@@ -785,7 +785,7 @@ int main(int argc, const char ** argv) {
                                 agentName += std::to_string(i);
                                 auto &circ_agt = visualisation.addAgent(agentName);
                                 // Position vars are named x, y, z; so they are used by default
-                                circ_agt.setModel(Stock::Models::ICOSPHERE);
+                                circ_agt.setModel(flamegpu::visualiser::Stock::Models::ICOSPHERE);
                                 circ_agt.setModelScale((i+1)*env.getProperty<float>("SEPARATION_RADIUS"));
                             }
                         }
@@ -810,9 +810,9 @@ int main(int argc, const char ** argv) {
                             for (unsigned int i = 0; i < populationSizes.size(); i++) {
                                 std::string agentName = "Boid";
                                 agentName += std::to_string(i);
-                                AgentVector population(model.Agent(agentName), populationSizes[i]);
+                                flamegpu::AgentVector population(model.Agent(agentName), populationSizes[i]);
                                 for (unsigned int j = 0; j < populationSizes[i]; j++) {
-                                    AgentVector::Agent instance = population[i];
+                                    flamegpu::AgentVector::Agent instance = population[i];
                                     instance.setVariable<int>("id", agentCounter);
                                     agentCounter++;
 
