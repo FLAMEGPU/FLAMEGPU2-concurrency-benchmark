@@ -117,7 +117,7 @@ FLAMEGPU_HOST_DEVICE_FUNCTION void clampPosition(float &x, float &y, float &z, c
  * outputdata agent function for Boid agents, which outputs publicly visible properties to a message list
  */
 const char* outputdata = R"###(
-FLAMEGPU_AGENT_FUNCTION(outputdata, flamegpu::MsgNone, flamegpu::MsgSpatial3D) {
+FLAMEGPU_AGENT_FUNCTION(outputdata, flamegpu::MessageNone, flamegpu::MessageSpatial3D) {
     // Output each agents publicly visible properties.
     FLAMEGPU->message_out.setVariable<int>("id", FLAMEGPU->getVariable<int>("id"));
     FLAMEGPU->message_out.setVariable<float>("x", FLAMEGPU->getVariable<float>("x"));
@@ -131,7 +131,7 @@ FLAMEGPU_AGENT_FUNCTION(outputdata, flamegpu::MsgNone, flamegpu::MsgSpatial3D) {
 )###";
 
 const char* outputdataBruteForce = R"###(
-    FLAMEGPU_AGENT_FUNCTION(outputdata, flamegpu::MsgNone, flamegpu::MsgBruteForce) {
+    FLAMEGPU_AGENT_FUNCTION(outputdata, flamegpu::MessageNone, flamegpu::MessageBruteForce) {
         // Output each agents publicly visible properties.
         FLAMEGPU->message_out.setVariable<int>("id", FLAMEGPU->getVariable<int>("id"));
         FLAMEGPU->message_out.setVariable<float>("x", FLAMEGPU->getVariable<float>("x"));
@@ -187,7 +187,7 @@ FLAMEGPU_HOST_DEVICE_FUNCTION void clampPosition(float &x, float &y, float &z, c
     z = (z > MAX_POSITION)? MAX_POSITION: z;
 }
 // Agent function
-FLAMEGPU_AGENT_FUNCTION(inputdata, flamegpu::MsgSpatial3D, flamegpu::MsgNone) {
+FLAMEGPU_AGENT_FUNCTION(inputdata, flamegpu::MessageSpatial3D, flamegpu::MessageNone) {
 
     // Agent properties in local register
     int id = FLAMEGPU->getVariable<int>("id");
@@ -386,7 +386,7 @@ const char* inputdataBruteForce = R"###(
         z = (z > MAX_POSITION)? MAX_POSITION: z;
     }
     // Agent function
-    FLAMEGPU_AGENT_FUNCTION(inputdata, flamegpu::MsgBruteForce, flamegpu::MsgNone) {
+    FLAMEGPU_AGENT_FUNCTION(inputdata, flamegpu::MessageBruteForce, flamegpu::MessageNone) {
     
         // Agent properties in local register
         int id = FLAMEGPU->getVariable<int>("id");
@@ -679,7 +679,7 @@ int main(int argc, const char ** argv) {
                                 std::string messageName = "location";
                                 messageName += std::to_string(i);
                                 if (experiment.spatial) {
-                                    flamegpu::MsgSpatial3D::Description &message = model.newMessage<flamegpu::MsgSpatial3D>(messageName);
+                                    flamegpu::MessageSpatial3D::Description &message = model.newMessage<flamegpu::MessageSpatial3D>(messageName);
                                     // Set the range and bounds.
                                     message.setRadius(env.getProperty<float>("INTERACTION_RADIUS"));
                                     message.setMin(env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MIN_POSITION"));
@@ -694,7 +694,7 @@ int main(int argc, const char ** argv) {
                                     message.newVariable<float>("fy");
                                     message.newVariable<float>("fz");
                                 } else {
-                                    flamegpu::MsgBruteForce::Description &message = model.newMessage<flamegpu::MsgBruteForce>(messageName);
+                                    flamegpu::MessageBruteForce::Description &message = model.newMessage<flamegpu::MessageBruteForce>(messageName);
                                     // A message to hold the location of an agent.
                                     message.newVariable<int>("id");
                                     message.newVariable<float>("x");
