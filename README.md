@@ -41,12 +41,11 @@ Generated using an `NVIDIA Titan V` GPU.
 The dependencies below are required for building FLAME GPU 2.
 
 + [CMake](https://cmake.org/download/) `>= 3.18`
-  + CMake `>= 3.15` currently works, but support will be dropped in a future release.
 + [CUDA](https://developer.nvidia.com/cuda-downloads) `>= 11.0` and a Compute Capability `>= 3.5` NVIDIA GPU.
   + CUDA `>= 10.0` currently works, but support will be dropped in a future release.
 + C++17 capable C++ compiler (host), compatible with the installed CUDA version
   + [Microsoft Visual Studio 2019](https://visualstudio.microsoft.com/) (Windows)
-  + [make](https://www.gnu.org/software/make/) and either [GCC](https://gcc.gnu.org/) `>= 7` or [Clang](https://clang.llvm.org/) `>= 5` (Linux)
+  + [make](https://www.gnu.org/software/make/) and either [GCC](https://gcc.gnu.org/) (Linux)
   + Older C++ compilers which support C++14 may currently work, but support will be dropped in a future release.
 + [git](https://git-scm.com/)
 
@@ -94,13 +93,18 @@ To run the experiments, run the generated binary file which will be found in `bi
 
 ### Required
 
-* [Python](https://www.python.org/downloads/) >= 3.0: Required for generating graphs
++ [Python](https://www.python.org/downloads/) >= 3.0: Required for generating graphs
+  + `numpy`
+  + `pandas`
+  + `matplotlib`
+  + `seaborn`
 
 ### Graph Generation
+
 Run the command:
 
 ```bash
-python3 graphs.py
+python3 ../reults/plot.py . -o .
 ```
 
-from the `build` folder. This will generate the figures in the `figures` folder
+from the `build` folder. This will generate the figures in the `build/figures` folder
