@@ -596,8 +596,8 @@ int main(int argc, const char ** argv) {
     Experiment largePopsFalloff("Large_Pops_Falloff", 8192, 8192, 8192, 1, 257, 16, 1, 1024, true, 100);
     Experiment largePopsFalloffBruteForce("Large_Pops_Falloff_Brute_Force", 2048, 8192, 2048, 1, 257, 8, 1, 1024, false, 100);
 
-    std::vector<Experiment> experiments = {largePopsFalloffBruteForce};
-    //std::vector<Experiment> experiments = {smallFixedPop, smallPops, largePops, deviceMaxed, smallFixedPopBruteForce, smallPopsBruteForce, largePopsBruteForce};
+    //std::vector<Experiment> experiments = {largePopsFalloffBruteForce};
+    std::vector<Experiment> experiments = {smallFixedPop, smallPops, largePops, deviceMaxed, smallFixedPopBruteForce, smallPopsBruteForce, largePopsBruteForce};
     
     for (Experiment experiment : experiments) {
         
