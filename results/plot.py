@@ -210,7 +210,7 @@ def process_data(input_dataframes, verbose):
         concurrentdf = grouped_df[(grouped_df.is_concurrent == 1)]
         concurrentdf.index = range(len(concurrentdf.index))
 
-        speedupdf = serialdf
+        speedupdf = serialdf.copy()
         speedupdf['speedup'] = serialdf['mean_ms_step_mean'] / concurrentdf['mean_ms_step_mean']
         output_dataframes['speedup_' + csv_name] = speedupdf
 
