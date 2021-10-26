@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION VERSION 3.18 FATAL_ERROR)
 
 # Name the project and set languages
-project(flamegpu2_example CUDA CXX)
+project(concurrency-benchmark CUDA CXX)
 
 
 # Optionaly set the version of flamegpu which should be used.
