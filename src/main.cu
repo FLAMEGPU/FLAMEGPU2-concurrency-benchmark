@@ -625,7 +625,7 @@ int main(int argc, const char ** argv) {
         // Pandas
         std::string csvFileName = "../results/" + experiment.title + ".csv";
         std::ofstream csv(csvFileName, std::ios::app);
-        csv << "is_concurrent, repetition, pop_size, num_species, ms_step_mean" << std::endl;
+        csv << "is_concurrent,repetition,pop_size,num_species,ms_step_mean" << std::endl;
         
         for (unsigned int isConcurrent = 0; isConcurrent <= 1; isConcurrent++) {
             for (unsigned int repetition = 0; repetition < experiment.repetitions; repetition++) {
