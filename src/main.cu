@@ -595,7 +595,7 @@ int main(int argc, const char ** argv) {
     Experiment largePopsFalloff("Large_Pops_Falloff", 8192, 8192, 8192, 1, 127, 16, repetitions, 1024, true, 100);
     Experiment largePopsFalloffBruteForce("Large_Pops_Falloff_Brute_Force", 2048, 8192, 2048, 1, 257, 8, repetitions, 1024, false, 100);
 
-    //std::vector<Experiment> experiments = {largePopsFalloffBruteForce};
+    // std::vector<Experiment> experiments = {largePopsFalloffBruteForce};
     std::vector<Experiment> experiments = {smallFixedPop, smallPops, largePops, deviceMaxed, smallFixedPopBruteForce, smallPopsBruteForce, largePopsBruteForce, largePopsFalloff, largePopsFalloffBruteForce};
     
     for (Experiment experiment : experiments) {
@@ -623,7 +623,7 @@ int main(int argc, const char ** argv) {
         }
 
         // Pandas
-        std::string csvFileName = "../results/" + experiment.title + ".csv";
+        std::string csvFileName = experiment.title + ".csv";
         std::ofstream csv(csvFileName, std::ios::app);
         csv << "is_concurrent,repetition,pop_size,num_species,ms_step_mean" << std::endl;
         
