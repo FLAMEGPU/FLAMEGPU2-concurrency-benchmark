@@ -876,14 +876,14 @@ int main(int argc, const char ** argv) {
         }
 
         // Output parameters to file
-        std::ofstream paramsFile("results/" + experiment.title + "/params.csv");
+        std::ofstream paramsFile(experiment.title + "/params.csv");
         if (paramsFile.is_open()) {
             paramsFile << initialPopSize << "," << finalPopSize << "," << popSizeIncrement << std::endl;
             paramsFile << initialNumSpecies << "," << finalNumSpecies << "," << numSpeciesIncrement << std::endl;
         }
 
         // Output concurrent results to file
-        std::ofstream concurrentOutputFile("results/" + experiment.title + "/concurrent.csv");
+        std::ofstream concurrentOutputFile(experiment.title + "/concurrent.csv");
         if (concurrentOutputFile.is_open()) {
             unsigned int i = 0;
             for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
@@ -896,7 +896,7 @@ int main(int argc, const char ** argv) {
         }
 
         // Output serial results to file
-        std::ofstream serialOutputFile("results/" + experiment.title + "/serial.csv");
+        std::ofstream serialOutputFile(experiment.title + "/serial.csv");
         if (serialOutputFile.is_open()) {
             unsigned int i = 0;
             for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
