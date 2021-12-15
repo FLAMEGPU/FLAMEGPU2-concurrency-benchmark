@@ -622,7 +622,7 @@ typedef struct Experiment {
 
 int main(int argc, const char ** argv) {
 
-    unsigned int repetitions = 3;
+    constexpr unsigned int repetitions = 3;
     Experiment smallFixedPop("Small_Fixed_Pop", 512, 512, 512, 1, 32, 1, repetitions, 1024, true, 1000);
     Experiment smallPops("Small_Pops", 128, 1024, 128, 1, 32, 1, repetitions, 1024, true, 1000);
     Experiment largePops("Large_Pops", 1024, 8192, 1024, 1, 32, 1, repetitions, 1024, true, 1000);
@@ -833,6 +833,8 @@ int main(int argc, const char ** argv) {
 
                         // Initialisation
                         cuda_model.initialise(argc, argv);
+                        // Set the rng seed to be the current repetition. Cannot currently support overriding via cli due to initailise() implementation in alpha.2
+                        cuda_model.SimulationConfig().random_seed = repetition;
 
                         // If no xml model file was is provided, generate a population.
                         if (cuda_model.getSimulationConfig().input_file.empty()) {
@@ -840,7 +842,7 @@ int main(int argc, const char ** argv) {
                             cuda_model.SimulationConfig().steps = experiment.steps;
 
                             // Uniformly distribute agents within space, with uniformly distributed initial velocity.
-                            std::mt19937 rngEngine(cuda_model.getSimulationConfig().random_seed);
+                            std::mt19937_64 rngEngine(cuda_model.getSimulationConfig().random_seed);
                             std::uniform_real_distribution<float> position_distribution(env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MAX_POSITION"));
                             std::uniform_real_distribution<float> velocity_distribution(-1, 1);
                             std::uniform_real_distribution<float> velocity_magnitude_distribution(env.getProperty<float>("MIN_INITIAL_SPEED"), env.getProperty<float>("MAX_INITIAL_SPEED"));
