@@ -285,13 +285,13 @@ FLAMEGPU_AGENT_FUNCTION(inputdata, flamegpu::MessageSpatial3D, flamegpu::Message
         float match_velocity_z = 0.f;
 
         const float MATCH_SCALE = FLAMEGPU->environment.getProperty<float>("MATCH_SCALE");
-        match_velocity_x = global_velocity_x * MATCH_SCALE;
-        match_velocity_y = global_velocity_y * MATCH_SCALE;
-        match_velocity_z = global_velocity_z * MATCH_SCALE;
+        match_velocity_x = global_velocity_x;
+        match_velocity_y = global_velocity_y;
+        match_velocity_z = global_velocity_z;
 
-        velocity_change_x += match_velocity_x - agent_fx;
-        velocity_change_y += match_velocity_y - agent_fy;
-        velocity_change_z += match_velocity_z - agent_fz;
+        velocity_change_x += (match_velocity_x - agent_fx) * MATCH_SCALE;
+        velocity_change_y += (match_velocity_y - agent_fy) * MATCH_SCALE;
+        velocity_change_z += (match_velocity_z - agent_fz) * MATCH_SCALE;
     }
 
     // Global scale of velocity change
@@ -504,13 +504,13 @@ const char* inputdataBruteForce = R"###(
         float match_velocity_z = 0.f;
 
         const float MATCH_SCALE = FLAMEGPU->environment.getProperty<float>("MATCH_SCALE");
-        match_velocity_x = global_velocity_x * MATCH_SCALE;
-        match_velocity_y = global_velocity_y * MATCH_SCALE;
-        match_velocity_z = global_velocity_z * MATCH_SCALE;
+        match_velocity_x = global_velocity_x;
+        match_velocity_y = global_velocity_y;
+        match_velocity_z = global_velocity_z;
 
-        velocity_change_x += match_velocity_x - agent_fx;
-        velocity_change_y += match_velocity_y - agent_fy;
-        velocity_change_z += match_velocity_z - agent_fz;
+        velocity_change_x += (match_velocity_x - agent_fx) * MATCH_SCALE;
+        velocity_change_y += (match_velocity_y - agent_fy) * MATCH_SCALE;
+        velocity_change_z += (match_velocity_z - agent_fz) * MATCH_SCALE;
     }
 
     // Global scale of velocity change
