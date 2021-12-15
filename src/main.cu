@@ -868,45 +868,6 @@ int main(int argc, const char ** argv) {
                 }
             }
         }
-
-        // Compute average results
-        for (unsigned int i = 0; i < concurrentResults.size(); i++) {
-            concurrentResults[i] /= static_cast<double>(experiment.repetitions);
-            serialResults[i] /= static_cast<double>(experiment.repetitions);
-        }
-
-        // Output parameters to file
-        std::ofstream paramsFile(experiment.title + "/params.csv");
-        if (paramsFile.is_open()) {
-            paramsFile << initialPopSize << "," << finalPopSize << "," << popSizeIncrement << std::endl;
-            paramsFile << initialNumSpecies << "," << finalNumSpecies << "," << numSpeciesIncrement << std::endl;
-        }
-
-        // Output concurrent results to file
-        std::ofstream concurrentOutputFile(experiment.title + "/concurrent.csv");
-        if (concurrentOutputFile.is_open()) {
-            unsigned int i = 0;
-            for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
-                for (unsigned int numSpecies = initialNumSpecies; numSpecies <= finalNumSpecies; numSpecies+= numSpeciesIncrement) {
-                    std::string separator = numSpecies == finalNumSpecies ? "\n" : ", ";
-                    concurrentOutputFile << concurrentResults[i] << separator;
-                    i++;
-                }
-            }
-        }
-
-        // Output serial results to file
-        std::ofstream serialOutputFile(experiment.title + "/serial.csv");
-        if (serialOutputFile.is_open()) {
-            unsigned int i = 0;
-            for (unsigned int popSize = initialPopSize; popSize <= finalPopSize; popSize += popSizeIncrement) {
-                for (unsigned int numSpecies = initialNumSpecies; numSpecies <= finalNumSpecies; numSpecies+= numSpeciesIncrement) {
-                    std::string separator = numSpecies == finalNumSpecies ? "\n" : ", ";
-                    serialOutputFile << serialResults[i] << separator;
-                    i++;
-                }
-            }
-        }
     }
     return 0;
 }
