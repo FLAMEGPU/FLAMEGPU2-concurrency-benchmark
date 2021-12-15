@@ -37,10 +37,10 @@ EXPECTED_CSV_FILES=[
 
 
 # input cols for per step per sim
-# GPU,release_mode,seatbelts_on,model,steps,agent_count,env_width,comm_radius,repeat,agent_density,step,S_step
+# GPU,release_mode,seatbelts_on,model,steps,agent_count,env_width,comm_radius,repeat,agent_density,step,s_step
 
 # Input cols for per sim.
-# GPU,release_mode,seatbelts_on,model,steps,agent_count,env_width,comm_radius,repeat,agent_density,mean_message_count,S_rtc,S_simulation,S_init,S_exit,S_step_mean
+# GPU,release_mode,seatbelts_on,model,steps,agent_count,env_width,comm_radius,repeat,agent_density,mean_message_count,s_rtc,s_simulation,s_init,s_exit,s_step_mean
 
 # input csv columns which identify a row as a duplicate of another repetition for aggregation, for per-step per-sim csvs
 GROUP_BY_COLUMNS_PER_STEP_PER_SIM = ['is_concurrent', 'pop_size', 'num_species']
@@ -51,12 +51,12 @@ GROUP_BY_COLUMNS_PER_SIM = ['is_concurrent', 'pop_size', 'num_species']
 
 # Aggregate operations to apply across grouped csv rows, for the per-step per-sim csvs
 AGGREGATIONS_PER_STEP_PER_SIM = {
-    'S_step_mean' : ['mean']
+    's_step_mean' : ['mean']
 }
 
 # Aggregate operations to apply across grouped csv rows, for the per-sim csvs
 AGGREGATIONS_PER_SIM = {
-    'S_step_mean' : ['mean']
+    's_step_mean' : ['mean']
 }
 
 
@@ -211,7 +211,7 @@ def process_data(input_dataframes, verbose):
         concurrentdf.index = range(len(concurrentdf.index))
 
         speedupdf = serialdf.copy()
-        speedupdf['speedup'] = serialdf['mean_S_step_mean'] / concurrentdf['mean_S_step_mean']
+        speedupdf['speedup'] = serialdf['mean_s_step_mean'] / concurrentdf['mean_s_step_mean']
         output_dataframes['speedup_' + csv_name] = speedupdf
 
     return output_dataframes
@@ -243,10 +243,10 @@ def store_processed_data(input_dataframes, processed_dataframes, output_dir, for
 
         # Get the max rtc time from the input file, and also output the mean too for good measure.
         # @todo - might be better to have a threshold cutoff?
-        if "S_rtc" in input_df:
-            max_S_rtc = input_df["S_rtc"].max()
-            mean_S_rtc = input_df["S_rtc"].mean()
-            print(f"{csv_name}: max_S_rtc {max_S_rtc:.3f}, mean_S_rtc {mean_S_rtc:.3f}")
+        if "s_rtc" in input_df:
+            max_s_rtc = input_df["s_rtc"].max()
+            mean_s_rtc = input_df["s_rtc"].mean()
+            print(f"{csv_name}: max_s_rtc {max_s_rtc:.3f}, mean_s_rtc {mean_s_rtc:.3f}")
 
     return success
 
@@ -263,18 +263,18 @@ MANUAL_PRETTY_CSV_KEY_MAP = {
     "repeat": "Repeat",
     "agent_density": "Agent Density",
     "mean_message_count": "Average Message Count",
-    "S_rtc": "RTC Time (S)",
-    "S_simulation": "Simulation Time (S)",
-    "S_init": "Init Function Time (S)",
-    "S_exit": "Exit Function Time (S)",
-    "S_step_mean": "Average Step Time (S)",
-    "S_step": "Step Time (S)",
-    "mean_S_rtc": "Average RTC Time (S)",
-    "mean_S_simulation": "Average Simulation Time (S)",
-    "mean_S_init": "Average Init Function Time (S)",
-    "mean_S_exit": "Average Exit Function Time (S)",
-    "mean_S_step_mean": "Average Step Time (S)",
-    "mean_S_step": "Average Step Time (S)",
+    "s_rtc": "RTC Time (s)",
+    "s_simulation": "Simulation Time (s)",
+    "s_init": "Init Function Time (s)",
+    "s_exit": "Exit Function Time (s)",
+    "s_step_mean": "Average Step Time (s)",
+    "s_step": "Step Time (s)",
+    "mean_s_rtc": "Average RTC Time (s)",
+    "mean_s_simulation": "Average Simulation Time (s)",
+    "mean_s_init": "Average Init Function Time (s)",
+    "mean_s_exit": "Average Exit Function Time (s)",
+    "mean_s_step_mean": "Average Step Time (s)",
+    "mean_s_step": "Average Step Time (s)",
     "mean_agent_density": "Agent Density",
     "env_volume": "Environment Volume",
     "num_species" : "Number of Species",
@@ -498,7 +498,7 @@ PLOTS_PER_CSV={
             filename="device_maxed.png",
             plot_type="lineplot",
             xkey="num_species",
-            ykey="mean_S_step_mean",
+            ykey="mean_s_step_mean",
             huekey="pop_size",
             stylekey="is_concurrent",
             sns_palette=SEQUENTIAL_PALETTE,
@@ -511,7 +511,7 @@ PLOTS_PER_CSV={
             filename="large_pops.png",
             plot_type="lineplot",
             xkey="num_species",
-            ykey="mean_S_step_mean",
+            ykey="mean_s_step_mean",
             huekey="pop_size",
             stylekey="is_concurrent",
             sns_palette=SEQUENTIAL_PALETTE,
@@ -524,7 +524,7 @@ PLOTS_PER_CSV={
             filename="large_pops_brute_force.png",
             plot_type="lineplot",
             xkey="num_species",
-            ykey="mean_S_step_mean",
+            ykey="mean_s_step_mean",
             huekey="pop_size",
             stylekey="is_concurrent",
             sns_palette=SEQUENTIAL_PALETTE,
@@ -537,7 +537,7 @@ PLOTS_PER_CSV={
             filename="small_fixed_pop.png",
             plot_type="lineplot",
             xkey="num_species",
-            ykey="mean_S_step_mean",
+            ykey="mean_s_step_mean",
             huekey="pop_size",
             stylekey="is_concurrent",
             sns_palette=SEQUENTIAL_PALETTE,
@@ -550,7 +550,7 @@ PLOTS_PER_CSV={
             filename="small_fixed_pop_brute_force.png",
             plot_type="lineplot",
             xkey="num_species",
-            ykey="mean_S_step_mean",
+            ykey="mean_s_step_mean",
             huekey="pop_size",
             stylekey="is_concurrent",
             sns_palette=SEQUENTIAL_PALETTE,
@@ -563,7 +563,7 @@ PLOTS_PER_CSV={
             filename="small_pops.png",
             plot_type="lineplot",
             xkey="num_species",
-            ykey="mean_S_step_mean",
+            ykey="mean_s_step_mean",
             huekey="pop_size",
             stylekey="is_concurrent",
             sns_palette=SEQUENTIAL_PALETTE,
@@ -576,7 +576,7 @@ PLOTS_PER_CSV={
             filename="small_Pops_brute_force.png",
             plot_type="lineplot",
             xkey="num_species",
-            ykey="mean_S_step_mean",
+            ykey="mean_s_step_mean",
             huekey="pop_size",
             stylekey="is_concurrent",
             sns_palette=SEQUENTIAL_PALETTE,
@@ -589,7 +589,7 @@ PLOTS_PER_CSV={
             filename="large_pops_falloff_brute_force.png",
             plot_type="lineplot",
             xkey="num_species",
-            ykey="mean_S_step_mean",
+            ykey="mean_s_step_mean",
             huekey="pop_size",
             stylekey="is_concurrent",
             sns_palette=SEQUENTIAL_PALETTE,

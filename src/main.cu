@@ -847,7 +847,7 @@ int main(int argc, const char ** argv) {
 
                         cuda_model.simulate();
                         const auto runTime = cuda_model.getElapsedTimeSimulation();
-                        const double averageStepTime = runTime / 1000.0;
+                        const double averageStepTime = runTime / static_cast<double>(experiment.steps);
                         
                         //std::cout << "Run complete. Average step time: " << averageStepTime << "S" << std::endl;
                         if (isConcurrent) {
@@ -857,7 +857,7 @@ int main(int argc, const char ** argv) {
                         }
                         resultsIndex++;
 
-                        //csv << "is_concurrent,repetition,pop_size,num_species,S_step_mean" << std::endl;
+                        //csv << "is_concurrent,repetition,pop_size,num_species,s_step_mean" << std::endl;
                         csv << isConcurrent << "," << repetition << "," << popSize << "," << numSpecies << "," << averageStepTime << std::endl;
 
             #ifdef VISUALISATION
