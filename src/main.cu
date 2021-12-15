@@ -625,7 +625,7 @@ int main(int argc, const char ** argv) {
         // Pandas
         std::string csvFileName = experiment.title + ".csv";
         std::ofstream csv(csvFileName, std::ios::app);
-        csv << "is_concurrent,repetition,pop_size,num_species,ms_step_mean" << std::endl;
+        csv << "is_concurrent,repetition,pop_size,num_species,S_step_mean" << std::endl;
         
         for (unsigned int isConcurrent = 0; isConcurrent <= 1; isConcurrent++) {
             for (unsigned int repetition = 0; repetition < experiment.repetitions; repetition++) {
@@ -847,9 +847,9 @@ int main(int argc, const char ** argv) {
 
                         cuda_model.simulate();
                         const auto runTime = cuda_model.getElapsedTimeSimulation();
-                        const double averageStepTime = runTime / 1000.0;
+                        const double averageStepTime = runTime / static_cast<double>(experiment.steps);
                         
-                        //std::cout << "Run complete. Average step time: " << averageStepTime << "ms" << std::endl;
+                        //std::cout << "Run complete. Average step time: " << averageStepTime << "S" << std::endl;
                         if (isConcurrent) {
                             concurrentResults[resultsIndex] += averageStepTime;
                         } else {
@@ -857,7 +857,7 @@ int main(int argc, const char ** argv) {
                         }
                         resultsIndex++;
 
-                        //csv << "is_concurrent,repetition,pop_size,num_species,ms_step_mean" << std::endl;
+                        //csv << "is_concurrent,repetition,pop_size,num_species,s_step_mean" << std::endl;
                         csv << isConcurrent << "," << repetition << "," << popSize << "," << numSpecies << "," << averageStepTime << std::endl;
 
             #ifdef VISUALISATION
