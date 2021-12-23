@@ -8,7 +8,7 @@ The Boids model is adapted from the FLAME GPU 2 example model to add a parametri
 ## Benchmark Description and Results
 
 
-Three experiments are undertaken within this benchmark. There is a range of raw data in the [`sample/data`](sample/data) directory with a description of the machine configurations used to generate it in each directory.
+A number of experiments are undertaken within this benchmark. There is a range of raw data in the [`sample/data`](sample/data) directory with a description of the machine configurations used to generate it in each directory.
 
 The results below are from the V100 runs on the Bessemer HPC system at the University of Sheffield. Job submission scripts are included in the [`scripts/slurm`]() folder.
 
