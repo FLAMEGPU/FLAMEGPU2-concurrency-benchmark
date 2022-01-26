@@ -31,6 +31,7 @@ EXPECTED_CSV_FILES=[
     "Small_Fixed_Pop_Brute_Force.csv",
     "Small_Pops.csv",
     "Small_Pops_Brute_Force.csv",
+    "Large_Pops_Falloff.csv",
     "Large_Pops_Falloff_Brute_Force.csv"
 ]
 
@@ -584,6 +585,19 @@ PLOTS_PER_CSV={
             miny=0
         )
     ],
+    "Large_Pops_Falloff.csv": [
+        PlotOptions(
+            filename="large_pops_falloff.png",
+            plot_type="lineplot",
+            xkey="num_species",
+            ykey="mean_s_step_mean",
+            huekey="pop_size",
+            stylekey="is_concurrent",
+            sns_palette=SEQUENTIAL_PALETTE,
+            minx=0,
+            miny=0
+        )
+    ],
     "Large_Pops_Falloff_Brute_Force.csv": [
         PlotOptions(
             filename="large_pops_falloff_brute_force.png",
@@ -678,6 +692,19 @@ PLOTS_PER_CSV={
     "speedup_Small_Pops_Brute_Force.csv": [
         PlotOptions(
             filename="small_Pops_brute_force.png",
+            plot_type="lineplot",
+            xkey="num_species",
+            ykey="speedup",
+            huekey="pop_size",
+            stylekey="pop_size",
+            sns_palette=SEQUENTIAL_PALETTE,
+            minx=0,
+            miny=0
+        )
+    ],
+    "speedup_Large_Pops_Falloff.csv": [
+        PlotOptions(
+            filename="large_pops_falloff.png",
             plot_type="lineplot",
             xkey="num_species",
             ykey="speedup",
