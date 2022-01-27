@@ -760,9 +760,7 @@ int main(int argc, const char ** argv) {
                                 std::string messageName = "location";
                                 messageName += std::to_string(i);
                                 std::string outputFuncName = "outputdata";
-                                outputFuncName += std::to_string(i);
                                 std::string inputFuncName = "inputdata";
-                                inputFuncName += std::to_string(i);
                                 
                                 // Use brute force or spatial?
                                 const char* outputFuncSource;
@@ -774,8 +772,8 @@ int main(int argc, const char ** argv) {
                                     outputFuncSource = outputdataBruteForce;
                                     inputFuncSource = inputdataBruteForce;
                                 }
-                                agent.newRTCFunction(agentName + outputFuncName, outputFuncSource).setMessageOutput(messageName);
-                                agent.newRTCFunction(agentName + inputFuncName, inputFuncSource).setMessageInput(messageName);
+                                agent.newRTCFunction(outputFuncName, outputFuncSource).setMessageOutput(messageName);
+                                agent.newRTCFunction(inputFuncName, inputFuncSource).setMessageInput(messageName);
                             }
                         }
 
@@ -788,8 +786,7 @@ int main(int argc, const char ** argv) {
                                 std::string agentName = "Boid";
                                 agentName += std::to_string(i);
                                 std::string outputFuncName = "outputdata";
-                                outputFuncName += std::to_string(i);
-                                layer.addAgentFunction(agentName, agentName + outputFuncName);
+                                layer.addAgentFunction(agentName, outputFuncName);
                             }
                         }
                         {   // Layer #2
@@ -798,8 +795,7 @@ int main(int argc, const char ** argv) {
                                 std::string agentName = "Boid";
                                 agentName += std::to_string(i);
                                 std::string inputFuncName = "inputdata";
-                                inputFuncName += std::to_string(i);
-                                layer.addAgentFunction(agentName, agentName + inputFuncName);
+                                layer.addAgentFunction(agentName, inputFuncName);
                             }
                         }
 
