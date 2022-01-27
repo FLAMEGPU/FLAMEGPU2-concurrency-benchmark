@@ -116,7 +116,6 @@ FLAMEGPU_HOST_DEVICE_FUNCTION void clampPosition(float &x, float &y, float &z, c
 /**
  * outputdata agent function for Boid agents, which outputs publicly visible properties to a message list
  */
-const char* outputdata = R"###(
 FLAMEGPU_AGENT_FUNCTION(outputdata, flamegpu::MessageNone, flamegpu::MessageSpatial3D) {
     // Output each agents publicly visible properties.
     FLAMEGPU->message_out.setVariable<int>("id", FLAMEGPU->getVariable<int>("id"));
@@ -128,64 +127,23 @@ FLAMEGPU_AGENT_FUNCTION(outputdata, flamegpu::MessageNone, flamegpu::MessageSpat
     FLAMEGPU->message_out.setVariable<float>("fz", FLAMEGPU->getVariable<float>("fz"));
     return flamegpu::ALIVE;
 }
-)###";
 
-const char* outputdataBruteForce = R"###(
-    FLAMEGPU_AGENT_FUNCTION(outputdata, flamegpu::MessageNone, flamegpu::MessageBruteForce) {
-        // Output each agents publicly visible properties.
-        FLAMEGPU->message_out.setVariable<int>("id", FLAMEGPU->getVariable<int>("id"));
-        FLAMEGPU->message_out.setVariable<float>("x", FLAMEGPU->getVariable<float>("x"));
-        FLAMEGPU->message_out.setVariable<float>("y", FLAMEGPU->getVariable<float>("y"));
-        FLAMEGPU->message_out.setVariable<float>("z", FLAMEGPU->getVariable<float>("z"));
-        FLAMEGPU->message_out.setVariable<float>("fx", FLAMEGPU->getVariable<float>("fx"));
-        FLAMEGPU->message_out.setVariable<float>("fy", FLAMEGPU->getVariable<float>("fy"));
-        FLAMEGPU->message_out.setVariable<float>("fz", FLAMEGPU->getVariable<float>("fz"));
-        return flamegpu::ALIVE;
-    }
-    )###";
+
+FLAMEGPU_AGENT_FUNCTION(outputdataBruteForce, flamegpu::MessageNone, flamegpu::MessageBruteForce) {
+    // Output each agents publicly visible properties.
+    FLAMEGPU->message_out.setVariable<int>("id", FLAMEGPU->getVariable<int>("id"));
+    FLAMEGPU->message_out.setVariable<float>("x", FLAMEGPU->getVariable<float>("x"));
+    FLAMEGPU->message_out.setVariable<float>("y", FLAMEGPU->getVariable<float>("y"));
+    FLAMEGPU->message_out.setVariable<float>("z", FLAMEGPU->getVariable<float>("z"));
+    FLAMEGPU->message_out.setVariable<float>("fx", FLAMEGPU->getVariable<float>("fx"));
+    FLAMEGPU->message_out.setVariable<float>("fy", FLAMEGPU->getVariable<float>("fy"));
+    FLAMEGPU->message_out.setVariable<float>("fz", FLAMEGPU->getVariable<float>("fz"));
+    return flamegpu::ALIVE;
+}
+
 /**
  * inputdata agent function for Boid agents, which reads data from neighbouring Boid agents, to perform the boid flocking model.
  */
-const char* inputdata = R"###(
-// Vector utility functions, see top of file for versions with commentary
-FLAMEGPU_HOST_DEVICE_FUNCTION float vec3Length(const float x, const float y, const float z) {
-    return sqrtf(x * x + y * y + z * z);
-}
-FLAMEGPU_HOST_DEVICE_FUNCTION void vec3Add(float &x, float &y, float &z, const float value) {
-    x += value;
-    y += value;
-    z += value;
-}
-FLAMEGPU_HOST_DEVICE_FUNCTION void vec3Sub(float &x, float &y, float &z, const float value) {
-    x -= value;
-    y -= value;
-    z -= value;
-}
-FLAMEGPU_HOST_DEVICE_FUNCTION void vec3Mult(float &x, float &y, float &z, const float multiplier) {
-    x *= multiplier;
-    y *= multiplier;
-    z *= multiplier;
-}
-FLAMEGPU_HOST_DEVICE_FUNCTION void vec3Div(float &x, float &y, float &z, const float divisor) {
-    x /= divisor;
-    y /= divisor;
-    z /= divisor;
-}
-FLAMEGPU_HOST_DEVICE_FUNCTION void vec3Normalize(float &x, float &y, float &z) {
-    // Get the length
-    float length = vec3Length(x, y, z);
-    vec3Div(x, y, z, length);
-}
-FLAMEGPU_HOST_DEVICE_FUNCTION void clampPosition(float &x, float &y, float &z, const float MIN_POSITION, const float MAX_POSITION) {
-    x = (x < MIN_POSITION)? MIN_POSITION: x;
-    x = (x > MAX_POSITION)? MAX_POSITION: x;
-
-    y = (y < MIN_POSITION)? MIN_POSITION: y;
-    y = (y > MAX_POSITION)? MAX_POSITION: y;
-
-    z = (z < MIN_POSITION)? MIN_POSITION: z;
-    z = (z > MAX_POSITION)? MAX_POSITION: z;
-}
 // Agent function
 FLAMEGPU_AGENT_FUNCTION(inputdata, flamegpu::MessageSpatial3D, flamegpu::MessageNone) {
     // Agent properties in local register
@@ -363,50 +321,9 @@ FLAMEGPU_AGENT_FUNCTION(inputdata, flamegpu::MessageSpatial3D, flamegpu::Message
 
     return flamegpu::ALIVE;
 }
-)###";
 
-const char* inputdataBruteForce = R"###(
-    // Vector utility functions, see top of file for versions with commentary
-    FLAMEGPU_HOST_DEVICE_FUNCTION float vec3Length(const float x, const float y, const float z) {
-        return sqrtf(x * x + y * y + z * z);
-    }
-    FLAMEGPU_HOST_DEVICE_FUNCTION void vec3Add(float &x, float &y, float &z, const float value) {
-        x += value;
-        y += value;
-        z += value;
-    }
-    FLAMEGPU_HOST_DEVICE_FUNCTION void vec3Sub(float &x, float &y, float &z, const float value) {
-        x -= value;
-        y -= value;
-        z -= value;
-    }
-    FLAMEGPU_HOST_DEVICE_FUNCTION void vec3Mult(float &x, float &y, float &z, const float multiplier) {
-        x *= multiplier;
-        y *= multiplier;
-        z *= multiplier;
-    }
-    FLAMEGPU_HOST_DEVICE_FUNCTION void vec3Div(float &x, float &y, float &z, const float divisor) {
-        x /= divisor;
-        y /= divisor;
-        z /= divisor;
-    }
-    FLAMEGPU_HOST_DEVICE_FUNCTION void vec3Normalize(float &x, float &y, float &z) {
-        // Get the length
-        float length = vec3Length(x, y, z);
-        vec3Div(x, y, z, length);
-    }
-    FLAMEGPU_HOST_DEVICE_FUNCTION void clampPosition(float &x, float &y, float &z, const float MIN_POSITION, const float MAX_POSITION) {
-        x = (x < MIN_POSITION)? MIN_POSITION: x;
-        x = (x > MAX_POSITION)? MAX_POSITION: x;
-    
-        y = (y < MIN_POSITION)? MIN_POSITION: y;
-        y = (y > MAX_POSITION)? MAX_POSITION: y;
-    
-        z = (z < MIN_POSITION)? MIN_POSITION: z;
-        z = (z > MAX_POSITION)? MAX_POSITION: z;
-    }
-    // Agent function
-    FLAMEGPU_AGENT_FUNCTION(inputdata, flamegpu::MessageBruteForce, flamegpu::MessageNone) {
+
+FLAMEGPU_AGENT_FUNCTION(inputdataBruteForce, flamegpu::MessageBruteForce, flamegpu::MessageNone) {
     // Agent properties in local register
     const flamegpu::id_t id = FLAMEGPU->getID();
     // Agent position
@@ -581,8 +498,8 @@ const char* inputdataBruteForce = R"###(
     FLAMEGPU->setVariable<float>("fz", agent_fz);
 
     return flamegpu::ALIVE;
-    }
-    )###";
+}
+
 
 typedef struct Experiment { 
 
@@ -768,14 +685,13 @@ int main(int argc, const char ** argv) {
                                 const char* outputFuncSource;
                                 const char* inputFuncSource;
                                 if (experiment.spatial) {
-                                    outputFuncSource = outputdata;
-                                    inputFuncSource = inputdata;
+                                    agent.newFunction("outputdata", outputdata).setMessageOutput(messageName);
+                                    agent.newFunction("inputdata", inputdata).setMessageInput(messageName);
                                 } else {
-                                    outputFuncSource = outputdataBruteForce;
-                                    inputFuncSource = inputdataBruteForce;
+                                    agent.newFunction("outputdataBruteForce", outputdataBruteForce).setMessageOutput(messageName);
+                                    agent.newFunction("inputdataBruteForce", inputdataBruteForce).setMessageInput(messageName);
                                 }
-                                agent.newRTCFunction(agentName + outputFuncName, outputFuncSource).setMessageOutput(messageName);
-                                agent.newRTCFunction(agentName + inputFuncName, inputFuncSource).setMessageInput(messageName);
+                                
                             }
                         }
 
