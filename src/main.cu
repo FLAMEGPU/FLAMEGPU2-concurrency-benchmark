@@ -632,8 +632,8 @@ int main(int argc, const char ** argv) {
     Experiment smallPopsBruteForce("Small_Pops_Brute_Force", 128, 1024, 128, 1, 32, 1, repetitions, 1024, false, 1000);
     Experiment largePopsBruteForce("Large_Pops_Brute_Force", 1024, 8192, 1024, 1, 32, 1, repetitions, 1024, false, 1000);
 
-    Experiment largePopsFalloff("Large_Pops_Falloff", 8192, 8192, 8192, 1, 127, 16, repetitions, 1024, true, 100);
-    Experiment largePopsFalloffBruteForce("Large_Pops_Falloff_Brute_Force", 2048, 8192, 2048, 1, 257, 8, repetitions, 1024, false, 100);
+    Experiment largePopsFalloff("Large_Pops_Falloff", 2048, 8192, 2048, 1, 127, 8, repetitions, 1024, true, 100);
+    Experiment largePopsFalloffBruteForce("Large_Pops_Falloff_Brute_Force", 2048, 8192, 2048, 1, 127, 8, repetitions, 1024, false, 100);
 
     // std::vector<Experiment> experiments = {largePopsFalloffBruteForce};
     std::vector<Experiment> experiments = {smallFixedPop, smallPops, largePops, deviceMaxed, smallFixedPopBruteForce, smallPopsBruteForce, largePopsBruteForce, largePopsFalloff, largePopsFalloffBruteForce};
@@ -664,8 +664,8 @@ int main(int argc, const char ** argv) {
 
         // Pandas
         std::string csvFileName = experiment.title + ".csv";
-        std::ofstream csv(csvFileName, std::ios::app);
-        csv << "is_concurrent,repetition,pop_size,num_species,S_step_mean" << std::endl;
+        std::ofstream csv(csvFileName, std::ios::trunc);
+        csv << "is_concurrent,repetition,pop_size,num_species,s_step_mean" << std::endl;
         
         for (unsigned int isConcurrent = 0; isConcurrent <= 1; isConcurrent++) {
             for (unsigned int repetition = 0; repetition < experiment.repetitions; repetition++) {
