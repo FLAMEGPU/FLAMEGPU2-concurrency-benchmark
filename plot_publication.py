@@ -151,7 +151,6 @@ def main():
     plot = sns.lineplot(x='num_species', y='s_step_mean', hue='pop_size', style='pop_size',data=df, palette=custom_palette, ax=ax['p3'], ci="sd")
     plot.set(xlabel='', ylabel='Step time (s)')
     # set tick formatting, title and hide legend
-    ax['p3'].yaxis.set_major_formatter(FormatStrFormatter('%0.1f'))
     ax['p3'].set_title(label='C', loc='left', fontweight="bold")
     ax['p3'].legend().set_visible(False)
     
@@ -177,7 +176,6 @@ def main():
     plot = sns.lineplot(x='num_species', y='s_step_mean', hue='pop_size', style='pop_size',data=df, palette=custom_palette, ax=ax['p4'], ci="sd")
     plot.set(xlabel='', ylabel='')
     # set tick formatting, title and hide legend
-    ax['p4'].yaxis.set_major_formatter(FormatStrFormatter('%0.1f'))
     ax['p4'].set_title(label='D', loc='left', fontweight="bold")
     ax['p4'].legend().set_visible(False)
     
@@ -203,7 +201,6 @@ def main():
     plot = sns.lineplot(x='num_species', y='s_step_mean', hue='pop_size', style='pop_size',data=df, palette=custom_palette, ax=ax['p7'], ci="sd")
     plot.set(xlabel='Species', ylabel='Step time (s)')
     # set tick formatting, title and hide legend
-    ax['p7'].yaxis.set_major_formatter(FormatStrFormatter('%0.1f'))
     ax['p7'].set_title(label='G', loc='left', fontweight="bold")
     ax['p7'].legend().set_visible(False)
     
@@ -229,7 +226,6 @@ def main():
     plot = sns.lineplot(x='num_species', y='s_step_mean', hue='pop_size', style='pop_size',data=df, palette=custom_palette, ax=ax['p8'], ci="sd")
     plot.set(xlabel='Species', ylabel='')
     # set tick formatting, title and hide legend
-    ax['p8'].yaxis.set_major_formatter(FormatStrFormatter('%0.1f'))
     ax['p8'].set_title(label='H', loc='left', fontweight="bold")
     ax['p8'].legend().set_visible(False)
     
