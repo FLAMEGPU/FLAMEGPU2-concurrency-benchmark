@@ -29,5 +29,5 @@ mkdir -p build && cd build
 cmake .. -DCUDA_ARCH=70 -DCMAKE_BUILD_TYPE=Release -DSEATBELTS=OFF 
 
 # Compile the code with make for GPUs in Bessener (SM_70)
-make -j `nproc`
+cmake --build . -j `nproc`
 
