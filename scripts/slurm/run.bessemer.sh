@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=8:00:00
+#SBATCH --time=96:00:00
 #SBATCH --partition=dcs-gpu
 #SBATCH --account=dcs-res
 # 1 GPU
