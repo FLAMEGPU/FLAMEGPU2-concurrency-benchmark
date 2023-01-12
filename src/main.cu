@@ -7,13 +7,8 @@
 #include "flamegpu/flamegpu.h"
 
 /**
- * FLAME GPU 2 implementation of the Boids model, using spatial3D messaging.
- * This is based on the FLAME GPU 1 implementation, but with dynamic generation of agents. 
- * Agents are also clamped to be within the environment bounds, rather than wrapped as in FLAME GPU 1.
- * 
- * @todo - Should the agent's velocity change when it is clamped to the environment?
+ * FLAME GPU 2 concurrency benchmark, using an implementation of the Boids flocking model.
  */
-
 
 /**
  * Get the length of a vector
@@ -110,8 +105,6 @@ FLAMEGPU_HOST_DEVICE_FUNCTION void clampPosition(float &x, float &y, float &z, c
     z = (z < MIN_POSITION)? MIN_POSITION: z;
     z = (z > MAX_POSITION)? MAX_POSITION: z;
 }
-
-
 
 /**
  * outputdata agent function for Boid agents, which outputs publicly visible properties to a message list
@@ -678,7 +671,7 @@ int main(int argc, const char ** argv) {
                         /**
                         * GLOBALS
                         */
-                        flamegpu::EnvironmentDescription &env = model.Environment();
+                        flamegpu::EnvironmentDescription env = model.Environment();
                         std::vector<unsigned int> populationSizes;
                         for (unsigned int pops = 0; pops < numSpecies; pops++) {
                             populationSizes.push_back(popSize);
@@ -718,7 +711,7 @@ int main(int argc, const char ** argv) {
                                 std::string messageName = "location";
                                 messageName += std::to_string(i);
                                 if (experiment.spatial) {
-                                    flamegpu::MessageSpatial3D::Description &message = model.newMessage<flamegpu::MessageSpatial3D>(messageName);
+                                    flamegpu::MessageSpatial3D::Description message = model.newMessage<flamegpu::MessageSpatial3D>(messageName);
                                     // Set the range and bounds.
                                     message.setRadius(env.getProperty<float>("INTERACTION_RADIUS"));
                                     message.setMin(env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MIN_POSITION"));
@@ -733,7 +726,7 @@ int main(int argc, const char ** argv) {
                                     message.newVariable<float>("fy");
                                     message.newVariable<float>("fz");
                                 } else {
-                                    flamegpu::MessageBruteForce::Description &message = model.newMessage<flamegpu::MessageBruteForce>(messageName);
+                                    flamegpu::MessageBruteForce::Description message = model.newMessage<flamegpu::MessageBruteForce>(messageName);
                                     // A message to hold the location of an agent.
                                     message.newVariable<int>("id");
                                     message.newVariable<float>("x");
@@ -749,7 +742,7 @@ int main(int argc, const char ** argv) {
                         for (unsigned int i = 0; i < populationSizes.size(); i++) {
                             {   // Boid agent
                                 std::string agentName("Boid" + std::to_string(i));
-                                flamegpu::AgentDescription &agent = model.newAgent(agentName);
+                                flamegpu::AgentDescription agent = model.newAgent(agentName);
                                 agent.newVariable<int>("id");
                                 agent.newVariable<float>("x");
                                 agent.newVariable<float>("y");
@@ -781,7 +774,7 @@ int main(int argc, const char ** argv) {
                         * Control flow
                         */     
                         {   // Layer #1
-                            flamegpu::LayerDescription &layer = model.newLayer();
+                            flamegpu::LayerDescription layer = model.newLayer();
                             for (unsigned int i = 0; i < populationSizes.size(); i++) {
                                 std::string agentName = "Boid";
                                 agentName += std::to_string(i);
@@ -790,7 +783,7 @@ int main(int argc, const char ** argv) {
                             }
                         }
                         {   // Layer #2
-                            flamegpu::LayerDescription &layer = model.newLayer();
+                            flamegpu::LayerDescription layer = model.newLayer();
                             for (unsigned int i = 0; i < populationSizes.size(); i++) {
                                 std::string agentName = "Boid";
                                 agentName += std::to_string(i);
@@ -803,42 +796,26 @@ int main(int argc, const char ** argv) {
                         /**
                         * Create Model Runner
                         */
-                        flamegpu::CUDASimulation cuda_model(model);
+                        flamegpu::CUDASimulation simulation(model);
 
                         /**
                         * Create visualisation
                         */
-                #ifdef VISUALISATION
-                        flamegpu::visualiser::ModelVis &visualisation = cuda_model.getVisualisation();
-                        {
-                            float envWidth = env.getProperty<float>("MAX_POSITION") - env.getProperty<float>("MIN_POSITION");
-                            const float INIT_CAM = env.getProperty<float>("MAX_POSITION") * 1.25f;
-                            visualisation.setInitialCameraLocation(INIT_CAM, INIT_CAM, INIT_CAM);
-                            visualisation.setCameraSpeed(0.002f * envWidth);
-                            for (unsigned int i = 0; i < populationSizes.size(); i++) {
-                                std::string agentName = "Boid";
-                                agentName += std::to_string(i);
-                                auto &circ_agt = visualisation.addAgent(agentName);
-                                // Position vars are named x, y, z; so they are used by default
-                                circ_agt.setModel(flamegpu::visualiser::Stock::Models::ICOSPHERE);
-                                circ_agt.setModelScale((i+1)*env.getProperty<float>("SEPARATION_RADIUS"));
-                            }
-                        }
-                        visualisation.activate();
-                #endif
 
                         // Initialisation
-                        cuda_model.initialise(argc, argv);
+                        simulation.initialise(argc, argv);
                         // Set the rng seed to be the current repetition. Cannot currently support overriding via cli due to initailise() implementation in alpha.2
-                        cuda_model.SimulationConfig().random_seed = repetition;
+                        simulation.SimulationConfig().random_seed = repetition;
+                        // Disable telemetry
+                        simulation.SimulationConfig().telemetry = false;
 
                         // If no xml model file was is provided, generate a population.
-                        if (cuda_model.getSimulationConfig().input_file.empty()) {
+                        if (simulation.getSimulationConfig().input_file.empty()) {
                             // Set number of steps
-                            cuda_model.SimulationConfig().steps = experiment.steps;
+                            simulation.SimulationConfig().steps = experiment.steps;
 
                             // Uniformly distribute agents within space, with uniformly distributed initial velocity.
-                            std::mt19937_64 rngEngine(cuda_model.getSimulationConfig().random_seed);
+                            std::mt19937_64 rngEngine(simulation.getSimulationConfig().random_seed);
                             std::uniform_real_distribution<float> position_distribution(env.getProperty<float>("MIN_POSITION"), env.getProperty<float>("MAX_POSITION"));
                             std::uniform_real_distribution<float> velocity_distribution(-1, 1);
                             std::uniform_real_distribution<float> velocity_magnitude_distribution(env.getProperty<float>("MIN_INITIAL_SPEED"), env.getProperty<float>("MAX_INITIAL_SPEED"));
@@ -873,18 +850,18 @@ int main(int argc, const char ** argv) {
                                     instance.setVariable<float>("fy", fy);
                                     instance.setVariable<float>("fz", fz);
                                 }
-                                cuda_model.setPopulationData(population);
+                                simulation.setPopulationData(population);
                             }
                         }
 
                         /**
                         * Execution
                         */
-                        cuda_model.CUDAConfig().inLayerConcurrency = isConcurrent;
-                        //std::cout << "In layer concurrency set to: " << cuda_model.CUDAConfig().inLayerConcurrency << std::endl;
+                        simulation.CUDAConfig().inLayerConcurrency = isConcurrent;
+                        //std::cout << "In layer concurrency set to: " << simulation.CUDAConfig().inLayerConcurrency << std::endl;
 
-                        cuda_model.simulate();
-                        const auto runTime = cuda_model.getElapsedTimeSimulation();
+                        simulation.simulate();
+                        const auto runTime = simulation.getElapsedTimeSimulation();
                         const double averageStepTime = runTime / static_cast<double>(experiment.steps);
                         
                         //std::cout << "Run complete. Average step time: " << averageStepTime << "S" << std::endl;
@@ -897,11 +874,6 @@ int main(int argc, const char ** argv) {
 
                         //csv << "is_concurrent,repetition,pop_size,num_species,s_step_mean" << std::endl;
                         csv << isConcurrent << "," << repetition << "," << popSize << "," << numSpecies << "," << averageStepTime << std::endl;
-
-            #ifdef VISUALISATION
-                        visualisation.join();
-                        visualisation.close();
-            #endif
                     }
                 }
             }

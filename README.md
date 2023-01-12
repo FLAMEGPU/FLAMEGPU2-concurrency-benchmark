@@ -8,9 +8,7 @@ A combined figure for use in publication is shown below. For details please refe
 
 [![Combined Benchmark Figure](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/paper_figure.png)](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/paper_figure.png)
 
-
 ## Benchmark Description and Results
-
 
 A number of experiments are undertaken within this benchmark. There is a range of raw data in the [`sample/data`](sample/data) directory with a description of the machine configurations used to generate it in each directory.
 
@@ -33,7 +31,6 @@ This figure shows the speedup gained by enabling concurrent execution of the age
 
 ![sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--small_Pops_brute_force.png](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--small_Pops_brute_force.png)
 
-
 ### Small Populations Speedup (Spatial)
 
 This figure shows the speedup gained by enabling concurrent execution of the agent functions of different species in a spatial messaging Boids model.
@@ -41,7 +38,7 @@ This figure shows the speedup gained by enabling concurrent execution of the age
 + Population sizes are stepped between 128 and 1024 at intervals of 128
 + Population density is fixed at 1024
 + Simulation timing is measured over 1000 steps
-	
+
 ![sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--small_pops.png](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--small_pops.png)
 
 ### Large Populations Speedup (Brute force)
@@ -72,11 +69,11 @@ This figure shows that for sufficiently large species which fully occupy the dev
 
 ## Building and Running the Benchmark
 
-Detail of dependencies and the `cmake` build process are described in full in the [FLAMEGPU2-example-template Repo](https://github.com/FLAMEGPU/FLAMEGPU2-example-template) and are not repeated here. The benchmark should be built with seatbelts off (e.g. `-DSEATBELTS=OFF` passed to the `cmake` configuration step) to disable additional run-time checks and optionally disabling Python Swig support which is not needed for this model(-DBUILD_SWIG_PYTHON=OFF ). E.g. for Volta (`SM_70`) GPUs under Linux.
+Detail of dependencies and the `cmake` build process are described in full in the [FLAMEGPU2-example-template Repo](https://github.com/FLAMEGPU/FLAMEGPU2-example-template) and are not repeated here. The benchmark should be built with seatbelts off (e.g. `-DFLAMEGPU_SEATBELTS=OFF` passed to the `cmake` configuration step) to disable additional run-time checks. E.g. for Volta (`SM_70`) GPUs under Linux.
 
 ```bash
 # Configure 
-cmake . -B build -DCMAKE_BUILD_TYPE=Release -DSEATBELTS=OFF -DBUILD_SWIG_PYTHON=OFF -DCUDA_ARCH=70
+cmake . -B build -DCMAKE_BUILD_TYPE=Release -DFLAMEGPU_SEATBELTS=OFF -DCMAKE_CUDA_ARCHITECTURES=70
 # Build
 cmake --build build -j`nproc` 
 ```
@@ -85,8 +82,9 @@ cmake --build build -j`nproc`
 
 ```bash
 cd build
-./bin/Release/circles-benchmarking 
+./bin/Release/concurrency-benchmark
 ```
+
 This will produce a number of `.csv` files in the `build` directory.
 
 Note: The `FLAMEGPU2_INC_DIR` environment variable may need to be set to `./_deps/flamegpu2-src/include/` for run-time compilation (RTC) to succeed if the source directory is not automatically found.
