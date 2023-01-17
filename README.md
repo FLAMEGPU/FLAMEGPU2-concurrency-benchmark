@@ -6,7 +6,7 @@ The Boids model is adapted from the FLAME GPU 2 example model to add a parametri
 
 A combined figure for use in publication is shown below. For details please refer to the publication.
 
-[![Combined Benchmark Figure](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/paper_figure.png)](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/paper_figure.png)
+[![Combined Benchmark Figure](sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/paper_figure.png)](sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/paper_figure.png)
 
 ## Benchmark Description and Results
 
@@ -18,8 +18,8 @@ The results below are from the V100 runs on the Bessemer HPC system at the Unive
 
 Experiments are conducted to measure speedup gained by enabling concurrent execution of species for a fixed population size of 512. The plots (not shown) can be observed for;
 
-+ [Brute Force Messaging](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--small_fixed_pop_brute_force.png)
-+ [Spatial Messaging](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--small_fixed_pop.png)
++ [Brute Force Messaging](sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/speedup--small_fixed_pop_brute_force.png)
++ [Spatial Messaging](sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/speedup--small_fixed_pop.png)
 
 ### Small Populations Speedup (Brute force)
 
@@ -29,7 +29,7 @@ This figure shows the speedup gained by enabling concurrent execution of the age
 + Population density is fixed at 1024
 + Simulation timing is measured over 1000 steps
 
-![sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--small_Pops_brute_force.png](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--small_Pops_brute_force.png)
+![sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/speedup--small_Pops_brute_force.png](sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/speedup--small_Pops_brute_force.png)
 
 ### Small Populations Speedup (Spatial)
 
@@ -39,7 +39,7 @@ This figure shows the speedup gained by enabling concurrent execution of the age
 + Population density is fixed at 1024
 + Simulation timing is measured over 1000 steps
 
-![sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--small_pops.png](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--small_pops.png)
+![sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/speedup--small_pops.png](sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/speedup--small_pops.png)
 
 ### Large Populations Speedup (Brute force)
 
@@ -49,7 +49,7 @@ This figure shows the speedup gained by enabling concurrent execution of the age
 + Population density is fixed at 1024
 + Simulation timing is measured over 1000 steps
 
-![sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--large_pops_brute_force.png](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--large_pops_brute_force.png)
+![sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/speedup--large_pops_brute_force.png](sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/speedup--large_pops_brute_force.png)
 
 ### Large Populations Speedup (Spatial)
 
@@ -59,13 +59,13 @@ This figure shows the speedup gained by enabling concurrent execution of the age
 + Population density is fixed at 1024
 + Simulation timing is measured over 1000 steps
 
-![sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--large_pops_brute_force.png](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/speedup--large_pops_brute_force.png)
+![sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/speedup--large_pops_brute_force.png](sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/speedup--large_pops_brute_force.png)
 
 ### Device Maxed
 
 This figure shows that for sufficiently large species which fully occupy the device, there is no significant difference in performance.
 
-![Fsample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/Device--device_maxed.png](sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff/Device--device_maxed.png)
+![Fsample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/Device--device_maxed.png](sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff/Device--device_maxed.png)
 
 ## Building and Running the Benchmark
 
@@ -115,11 +115,11 @@ python3 plot.py build -o build/figures
 The sample figures were generated from the root directory using
 
 ```bash
-python3 plot.py sample/data/v100-470.82.01/alpha.2-v100-11.0-beltsoff -o sample/data-figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff
+python3 plot.py sample/data/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff -o sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff
 ```
 
-The publication figure was generated using 
+The publication figure was generated using:
 
 ```bash
-python3 plot_publication.py -i sample/data/v100-470.82.01/alpha.2-v100-11.0-beltsoff -o sample/figures/v100-470.82.01/alpha.2-v100-11.0-beltsoff
+python3 plot_publication.py -i sample/data/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff -o sample/figures/v100-515.65.01/2.0.0-rc-v100-11.0-beltsoff
 ```
